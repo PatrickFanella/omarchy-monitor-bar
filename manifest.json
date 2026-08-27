@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "onnwee.monitor-bar",
+  "name": "Onnwee per-monitor bar",
+  "version": "1.0.0",
+  "author": "onnwee",
+  "description": "A native Omarchy top bar with exact per-monitor layouts",
+  "kinds": [
+    "bar"
+  ],
+  "entryPoints": {
+    "bar": "Bar.qml"
+  }
+}
