@@ -1,0 +1,29 @@
+# SPDX-License-Identifier: MIT
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Run portable checks
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py'
+          node tests/test_model.mjs
+          node tests/test_bar_model.mjs
+          python -m py_compile tools/*.py tests/*.py
+          python tools/sync_stock_bar.py --upstream-dir vendor/omarchy-4.0.1-1/bar --check
+          git diff --check

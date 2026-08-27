@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 import QtQuick
 import qs.Commons
 import qs.Ui

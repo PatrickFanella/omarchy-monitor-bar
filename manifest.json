@@ -1,14 +1,18 @@
 {
   "schemaVersion": 1,
-  "id": "onnwee.monitor-bar",
-  "name": "Onnwee per-monitor bar",
+  "id": "patrickfanella.monitor-bar",
+  "name": "Omarchy Monitor Bar",
   "version": "1.0.0",
-  "author": "onnwee",
-  "description": "A native Omarchy top bar with exact per-monitor layouts",
+  "author": "PatrickFanella",
+  "description": "Configure Full, Minimal, or Hidden Omarchy bar layouts for each monitor",
+  "license": "MIT",
+  "homepage": "https://github.com/PatrickFanella/omarchy-monitor-bar",
   "kinds": [
-    "bar"
+    "bar",
+    "panel"
   ],
   "entryPoints": {
-    "bar": "Bar.qml"
+    "bar": "Bar.qml",
+    "panel": "SettingsPanel.qml"
   }
 }

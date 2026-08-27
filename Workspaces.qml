@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Derived from Omarchy stock Workspaces.qml, Copyright (c) David Heinemeier Hansson.
+
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Hyprland
@@ -16,8 +19,9 @@ BarWidget {
   // treated as no matches rather than leaking every workspace onto every bar.
   property string screenName: ""
 
-  // Display-only labels are injected by the per-monitor layout. The model
-  // remains numeric, so workspace lookup and dispatch continue to use IDs.
+  // IDs and display-only labels are injected by minimal monitor layouts.
+  // Without IDs this retains the stock live-monitor fallback.
+  readonly property var configuredWorkspaceIds: root.setting("workspaceIds", null)
   readonly property var displayLabels: root.setting("displayLabels", ({}))
 
   function workspaceMonitorName(workspace) {
@@ -36,6 +40,9 @@ BarWidget {
   }
 
   function workspaceIds() {
+    if (Array.isArray(root.configuredWorkspaceIds))
+      return root.configuredWorkspaceIds.slice()
+
     var ids = []
     var values = Hyprland.workspaces.values
 
@@ -60,7 +67,7 @@ BarWidget {
     var key = String(id)
     return labels && labels[key] !== undefined
       ? String(labels[key])
-      : (root.screenName === "DP-1" && id === 10 ? "0" : key)
+      : (id === 10 ? "0" : key)
   }
 
   readonly property real trailingGap: root.vertical ? 0 : Style.spaceReal(1.5)
@@ -100,6 +107,11 @@ BarWidget {
             ? Math.max(Style.space(20), labelWidth + scaledHorizontalMargin * 2)
             : Style.space(20))
         fixedHeight: root.barSize
+        Accessible.role: Accessible.Button
+        Accessible.name: "Workspace " + displayText
+        Accessible.description: occupied ? "Occupied workspace on " + root.screenName : "Empty workspace on " + root.screenName
+        Accessible.selected: focused
+        Accessible.onPressAction: root.focusWorkspace(modelData)
         onPressed: function() { root.focusWorkspace(modelData) }
       }
     }

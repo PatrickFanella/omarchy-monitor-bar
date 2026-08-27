@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+.DS_Store
+Thumbs.db
+*~
+*.swp
+*.swo
+.idea/
+.vscode/
+
+.Bar.qml.*
+.BarModel.js.*
+tools/*.tmp
+tools/*.temp
