@@ -11,10 +11,13 @@ Omarchy Monitor Bar assigns a separate bar layout to each connected monitor. It 
 - Stock bar position, transparency, widgets, panels, and trusted local commands on Full bars
 - A settings panel with validation, conflict handling, and stock-source checks
 
-## Requirements
+## Runtime dependencies
 
 - Omarchy package `4.0.1-1`
-- The stock files installed under `/usr/share/omarchy/shell/plugins/bar`
+- Quickshell, Hyprland, `hyprctl`, and the Omarchy shell commands included with that package
+- `Noto Sans Symbols 2`, included with Omarchy, for monitor glyphs
+- The stock bar sources under `/usr/share/omarchy/shell/plugins/bar`
+- Bash for trusted command entries inherited from the stock bar
 - Python 3 for the settings panel's stock-source **Check** and **Sync** actions
 
 The gear and configuration UI otherwise run without Node.js. Node.js is required only for development checks.
@@ -73,11 +76,13 @@ omarchy plugin remove patrickfanella.monitor-bar --yes
 
 The plugin stores its monitor configuration under the `patrickfanella.monitor-bar` key in `~/.config/omarchy/shell.json`. It also sets `bar.id`, `bar.position`, and `bar.transparent` through the Omarchy shell API. It does not edit `shell.settings`.
 
+The settings panel changes `shell.json` only after you select **Save**. Full-bar position, transparency, and widget-reordering actions inherited from the stock bar also update their related `bar` fields after you perform those actions. **Sync** updates the generated bar files inside the plugin checkout after you select it and only when the installed stock-source hashes match. The plugin uses no network service, telemetry, or `sudo`.
+
 If the monitor configuration is absent, the first connected monitor becomes the primary Full monitor. Unknown monitors default to Hidden. The settings panel keeps disconnected configured monitors so you can edit their saved settings while they are offline.
 
 If settings changed outside the open panel, choose **Reload** to discard the draft or **Rebase draft** to keep it against the new file state. If the generated stock copy is stale, open settings and use **Check** or **Sync**. Sync refuses an unrecognized stock hash instead of rewriting files from an unsupported Omarchy version.
 
-The bar inherits trusted local command behavior from the stock Omarchy bar. Enabled stock widgets can run the same local commands they run in the built-in bar. The monitor workspace widget dispatches workspace focus through `hyprctl`. Install only from a source you trust.
+The bar inherits trusted local command behavior from the stock Omarchy bar. Enabled stock widgets can run the same local commands they run in the built-in bar. The monitor workspace widget dispatches workspace focus through `hyprctl`, and the confirmed restart action runs `omarchy-restart-shell`. Install only from a source you trust.
 
 ## Compatibility and stock sync policy
 
