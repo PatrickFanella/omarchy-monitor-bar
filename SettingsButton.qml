@@ -3,6 +3,7 @@
 import QtQuick
 import qs.Commons
 import qs.Ui
+import "I18n.js" as I18n
 
 WidgetButton {
   id: root
@@ -10,14 +11,15 @@ WidgetButton {
   property string moduleName: ""
   property var settings: ({})
   property string screenName: ""
+  readonly property string locale: I18n.currentLocale()
 
   text: "󰒓"
   fontFamily: Style.font.family
   fontSize: Style.font.icon
-  tooltipText: "Monitor bar settings"
+  tooltipText: I18n.t(locale, "settings.title")
   Accessible.role: Accessible.Button
-  Accessible.name: "Open monitor bar settings"
-  Accessible.description: "Opens monitor bar settings in a separate keyboard-focusable window"
+  Accessible.name: I18n.t(locale, "settingsButton.open")
+  Accessible.description: I18n.t(locale, "settingsButton.description")
   Accessible.onPressAction: root.activate()
   activeFocusOnTab: true
 

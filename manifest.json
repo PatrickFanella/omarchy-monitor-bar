@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "patrickfanella.monitor-bar",
-  "name": "Omarchy Monitor Bar",
+  "name": "Omarchy Multi-Monitor Bar",
   "version": "1.0.0",
   "author": "PatrickFanella",
-  "description": "Configure Full, Minimal, or Hidden Omarchy bar layouts for each monitor",
+  "description": "Configure localized Full, Minimal, or Hidden Omarchy bars for each monitor",
   "license": "MIT",
   "homepage": "https://github.com/PatrickFanella/omarchy-monitor-bar",
   "kinds": [

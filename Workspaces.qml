@@ -6,6 +6,7 @@ import QtQuick.Layouts
 import Quickshell.Hyprland
 import qs.Commons
 import qs.Ui
+import "I18n.js" as I18n
 
 // The stock widget deliberately has a small fixed fallback model. This copy
 // keeps its rendering and dispatch behavior, while scoping the model to the
@@ -18,6 +19,7 @@ BarWidget {
   // Injected by the monitor bar's ModuleSlot. An empty value is intentionally
   // treated as no matches rather than leaking every workspace onto every bar.
   property string screenName: ""
+  readonly property string locale: I18n.currentLocale()
 
   // IDs and display-only labels are injected by minimal monitor layouts.
   // Without IDs this retains the stock live-monitor fallback.
@@ -108,8 +110,10 @@ BarWidget {
             : Style.space(20))
         fixedHeight: root.barSize
         Accessible.role: Accessible.Button
-        Accessible.name: "Workspace " + displayText
-        Accessible.description: occupied ? "Occupied workspace on " + root.screenName : "Empty workspace on " + root.screenName
+        Accessible.name: I18n.t(root.locale, "workspace.name", { name: displayText })
+        Accessible.description: occupied
+          ? I18n.t(root.locale, "workspace.occupiedOn", { monitor: root.screenName })
+          : I18n.t(root.locale, "workspace.emptyOn", { monitor: root.screenName })
         Accessible.selected: focused
         Accessible.onPressAction: root.focusWorkspace(modelData)
         onPressed: function() { root.focusWorkspace(modelData) }

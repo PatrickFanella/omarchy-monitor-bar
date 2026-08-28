@@ -1,6 +1,6 @@
-# Omarchy Monitor Bar
+# Omarchy Multi-Monitor Bar
 
-Omarchy Monitor Bar assigns a separate bar layout to each connected monitor. It keeps the stock Omarchy bar on the primary monitor and supports smaller or hidden bars on other outputs.
+Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monitor. It keeps the stock Omarchy bar on the primary monitor and supports smaller or hidden bars on other outputs.
 
 ## Features
 
@@ -10,6 +10,11 @@ Omarchy Monitor Bar assigns a separate bar layout to each connected monitor. It 
 - Monitor-scoped workspace buttons and labels
 - Stock bar position, transparency, widgets, panels, and trusted local commands on Full bars
 - A settings panel with validation, conflict handling, and stock-source checks
+- Localized settings and accessibility text in 10 languages
+
+## Languages
+
+The plugin follows the system UI language when the Omarchy shell starts. It supports English, German, Spanish, French, Italian, Brazilian Portuguese, Dutch, Polish, Croatian, and Simplified Chinese. Unsupported locales use English. Restart the shell after changing the system language.
 
 ## Runtime dependencies
 
@@ -129,6 +134,6 @@ Run these checks before each release:
 
 ## License and attribution
 
-Omarchy Monitor Bar is licensed under the MIT License. See [LICENSE](LICENSE).
+Omarchy Multi-Monitor Bar is licensed under the MIT License. See [LICENSE](LICENSE).
 
 Generated `Bar.qml` and `BarModel.js`, `Workspaces.qml`, and the pinned source snapshots derive from [Omarchy](https://github.com/basecamp/omarchy), Copyright David Heinemeier Hansson, under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

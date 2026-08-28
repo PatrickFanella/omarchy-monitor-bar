@@ -8,6 +8,7 @@ import Quickshell.Io
 import qs.Commons
 import qs.Ui
 import "MonitorBarModel.js" as MonitorBarModel
+import "I18n.js" as I18n
 
 Item {
   id: root
@@ -16,6 +17,7 @@ Item {
   property var manifest: null
   property var pluginRegistry: null
   property var barWidgetRegistry: null
+  readonly property string locale: I18n.currentLocale()
   property bool closingFromHost: false
 
   property var draft: MonitorBarModel.defaultConfig([])
@@ -30,7 +32,7 @@ Item {
   property bool writingConfig: false
   property bool closeConfirmOpen: false
   property string syncState: "idle"
-  property string syncMessage: "Not checked"
+  property string syncMessage: I18n.t(locale, "sync.notChecked")
   property string syncDetail: ""
   property bool restartArmed: false
   property var modalReturnFocus: null
@@ -48,7 +50,7 @@ Item {
   readonly property string validationError: validateDraft()
   readonly property bool dirty: snapshot() !== baselineSnapshot
   readonly property string sourceDir: manifest && manifest.__sourceDir ? String(manifest.__sourceDir) : ""
-  readonly property string sourceError: sourceDir ? "" : "Plugin source directory is unavailable. Reinstall or reload the plugin before checking or syncing."
+  readonly property string sourceError: sourceDir ? "" : I18n.t(locale, "sync.sourceUnavailable")
   readonly property bool canRestart: !syncProcess.running
     && !dirty && !validationError && !externalConflict
     && (syncState === "idle" || syncState === "current" || syncState === "stale")
@@ -182,6 +184,23 @@ Item {
     refreshMonitors()
   }
 
+  function positionLabel(value) {
+    return I18n.t(locale, "position." + value)
+  }
+
+  function positionOptions() {
+    return [
+      { value: "top", label: positionLabel("top") },
+      { value: "right", label: positionLabel("right") },
+      { value: "bottom", label: positionLabel("bottom") },
+      { value: "left", label: positionLabel("left") }
+    ]
+  }
+
+  function modeLabel(value) {
+    return I18n.t(locale, "mode." + value)
+  }
+
   function makePrimary() {
     if (!selectedMonitor) return
     ensureSelectedOutput()
@@ -220,8 +239,8 @@ Item {
 
   function validateDraft() {
     var serial = validationSerial + draftSerial
-    if (!draft.primary || !draft.outputs[draft.primary]) return "Choose a primary monitor."
-    if (draft.outputs[draft.primary].mode !== "full") return "The primary monitor must use Full mode."
+    if (!draft.primary || !draft.outputs[draft.primary]) return I18n.t(locale, "validation.choosePrimary")
+    if (draft.outputs[draft.primary].mode !== "full") return I18n.t(locale, "validation.primaryFull")
     var used = {}
     var names = Object.keys(draft.outputs)
     for (var n = 0; n < names.length; n++) {
@@ -231,10 +250,10 @@ Item {
       for (var i = 0; i < rows.length; i++) {
         var id = rows[i].id
         if (typeof id !== "number" || !Number.isSafeInteger(id) || id <= 0 || id > 2147483647)
-          return "Workspace IDs must be positive whole numbers no greater than 2147483647."
-        if (used[id]) return "Workspace ID " + id + " is used more than once."
+          return I18n.t(locale, "validation.workspaceIdRange")
+        if (used[id]) return I18n.t(locale, "validation.workspaceIdDuplicate", { id: id })
         used[id] = true
-        if (typeof rows[i].label !== "string") return "Every workspace needs a text label."
+        if (typeof rows[i].label !== "string") return I18n.t(locale, "validation.workspaceLabel")
       }
     }
     return ""
@@ -315,7 +334,7 @@ Item {
     externalConflict = false
     if (!syncProcess.running) {
       syncState = "idle"
-      syncMessage = sourceError || "Not checked"
+      syncMessage = sourceError || I18n.t(locale, "sync.notChecked")
       syncDetail = sourceError
     }
   }
@@ -392,7 +411,7 @@ Item {
   function runCheck() {
     if (syncProcess.running || !sourceDir) return
     syncState = "checking"
-    syncMessage = "Checking stock bar…"
+    syncMessage = I18n.t(locale, "sync.checkingStock")
     syncDetail = ""
     syncProcess.action = "check"
     syncProcess.command = ["python3", sourceDir + "/tools/sync_stock_bar.py", "--check"]
@@ -402,7 +421,7 @@ Item {
   function runSync() {
     if (syncProcess.running || !sourceDir) return
     syncState = "syncing"
-    syncMessage = "Syncing stock bar…"
+    syncMessage = I18n.t(locale, "sync.syncingStock")
     syncDetail = ""
     syncProcess.action = "sync"
     syncProcess.command = ["python3", sourceDir + "/tools/sync_stock_bar.py"]
@@ -412,14 +431,14 @@ Item {
   function finishSync(exitCode) {
     var detail = String(syncProcess.stderrText || "").trim()
     if (syncProcess.action === "check") {
-      if (exitCode === 0) { syncState = "current"; syncMessage = "Current" }
-      else if (detail.indexOf("stale generated") >= 0) { syncState = "stale"; syncMessage = "Stock bar copy is stale" }
-      else if (detail.indexOf("changed: expected sha256") >= 0) { syncState = "unsupported"; syncMessage = "Installed Omarchy bar is unsupported" }
-      else { syncState = "error"; syncMessage = detail || "Check failed" }
+      if (exitCode === 0) { syncState = "current"; syncMessage = I18n.t(locale, "sync.current") }
+      else if (detail.indexOf("stale generated") >= 0) { syncState = "stale"; syncMessage = I18n.t(locale, "sync.stale") }
+      else if (detail.indexOf("changed: expected sha256") >= 0) { syncState = "unsupported"; syncMessage = I18n.t(locale, "sync.unsupported") }
+      else { syncState = "error"; syncMessage = detail || I18n.t(locale, "sync.checkFailed") }
     } else {
-      if (exitCode === 0) { syncState = "current"; syncMessage = "Synced. Restart the shell to load it." }
-      else if (detail.indexOf("changed: expected sha256") >= 0) { syncState = "unsupported"; syncMessage = "Installed Omarchy bar is unsupported" }
-      else { syncState = "error"; syncMessage = detail || "Sync failed" }
+      if (exitCode === 0) { syncState = "current"; syncMessage = I18n.t(locale, "sync.syncedRestart") }
+      else if (detail.indexOf("changed: expected sha256") >= 0) { syncState = "unsupported"; syncMessage = I18n.t(locale, "sync.unsupported") }
+      else { syncState = "error"; syncMessage = detail || I18n.t(locale, "sync.syncFailed") }
     }
     syncDetail = detail || syncMessage
   }
@@ -475,7 +494,7 @@ Item {
 
   FloatingWindow {
     id: window
-    title: "Monitor bar settings"
+    title: I18n.t(root.locale, "settings.title")
     color: root.background
     implicitWidth: 720
     implicitHeight: 600
@@ -533,20 +552,20 @@ Item {
           ColumnLayout {
             Layout.fillWidth: true
             spacing: Style.space(2)
-            Text { text: "MONITOR BAR"; color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.iconLarge; font.bold: true }
-            Text { text: "Per-display layout and workspace labels"; color: Qt.darker(root.foreground, 1.45); font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall }
+            Text { text: I18n.t(root.locale, "settings.heading"); color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.iconLarge; font.bold: true }
+            Text { text: I18n.t(root.locale, "settings.subtitle"); color: Qt.darker(root.foreground, 1.45); font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall }
           }
           RowLayout {
             Layout.fillWidth: root.compact
             Layout.alignment: Qt.AlignRight
             Text {
-              text: root.validationError ? "Fix validation" : (root.dirty ? "Unsaved" : "Saved")
+              text: root.validationError ? I18n.t(root.locale, "status.fixValidation") : (root.dirty ? I18n.t(root.locale, "status.unsaved") : I18n.t(root.locale, "status.saved"))
               color: root.validationError ? root.urgent : Qt.darker(root.foreground, 1.35)
               font.family: root.fontFamily; font.pixelSize: Style.font.caption
             }
             Item { Layout.fillWidth: root.compact }
             Button {
-              text: "Save"
+              text: I18n.t(root.locale, "action.save")
               iconText: "󰆓"
               bordered: true
               focusable: true
@@ -554,19 +573,19 @@ Item {
               enabled: root.dirty && !root.validationError && !root.externalConflict
               opacity: enabled ? 1 : 0.45
               Accessible.role: Accessible.Button
-              Accessible.name: "Save monitor bar settings"
-              Accessible.description: root.externalConflict ? "Reload or rebase the external change before saving" : ""
+              Accessible.name: I18n.t(root.locale, "a11y.saveSettings")
+              Accessible.description: root.externalConflict ? I18n.t(root.locale, "a11y.resolveExternalBeforeSave") : ""
               onClicked: root.save()
             }
             Button {
               id: closeButton
-              text: "Close"
+              text: I18n.t(root.locale, "action.close")
               iconText: "󰅖"
               bordered: true
               focusable: true
               Accessible.role: Accessible.Button
-              Accessible.name: "Close monitor bar settings"
-              Accessible.description: root.dirty ? "Opens a save, discard, or cancel dialog" : "Closes the settings panel"
+              Accessible.name: I18n.t(root.locale, "a11y.closeSettings")
+              Accessible.description: root.dirty ? I18n.t(root.locale, "a11y.closeWithChanges") : I18n.t(root.locale, "a11y.closePanel")
               onClicked: root.requestClose()
             }
           }
@@ -579,37 +598,37 @@ Item {
           columns: root.compact ? 1 : 4
           rowSpacing: Style.space(10)
           columnSpacing: Style.space(18)
-          Text { text: "POSITION"; color: Qt.darker(root.foreground, 1.3); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
+          Text { text: I18n.t(root.locale, "position.heading"); color: Qt.darker(root.foreground, 1.3); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
           ButtonGroup {
             id: positionGroup
             visible: !root.compact
-            options: ["top", "right", "bottom", "left"]
+            options: root.positionOptions()
             value: root.position
             Accessible.role: Accessible.Grouping
-            Accessible.name: "Bar position"
-            Accessible.description: "Current position: " + root.position
+            Accessible.name: I18n.t(root.locale, "position.label")
+            Accessible.description: I18n.t(root.locale, "position.current", { position: root.positionLabel(root.position) })
             onChanged: function(value) { root.position = value }
           }
           Dropdown {
             id: positionDropdown
             visible: root.compact
             Layout.fillWidth: true
-            label: "Bar position"
-            options: ["top", "right", "bottom", "left"]
+            label: I18n.t(root.locale, "position.label")
+            options: root.positionOptions()
             value: root.position
             Accessible.role: Accessible.ComboBox
-            Accessible.name: "Bar position"
-            Accessible.description: "Current value: " + positionDropdown.currentLabel()
+            Accessible.name: I18n.t(root.locale, "position.label")
+            Accessible.description: I18n.t(root.locale, "common.currentValue", { value: positionDropdown.currentLabel() })
             onChanged: function(value) { root.position = value }
           }
           Item { visible: !root.compact; Layout.fillWidth: true }
           Toggle {
             Layout.fillWidth: root.compact
-            label: "Transparent"
-            description: root.compact ? "Let the wallpaper show through the bar" : ""
+            label: I18n.t(root.locale, "appearance.transparent")
+            description: root.compact ? I18n.t(root.locale, "appearance.transparentDescription") : ""
             checked: root.transparent
             Accessible.role: Accessible.CheckBox
-            Accessible.name: "Transparent bar background"
+            Accessible.name: I18n.t(root.locale, "appearance.transparentA11y")
             Accessible.checked: root.transparent
             onClicked: root.transparent = !root.transparent
           }
@@ -619,19 +638,19 @@ Item {
           id: monitorDropdown
           visible: root.compact
           Layout.fillWidth: true
-          label: "Monitor"
+          label: I18n.t(root.locale, "monitor.label")
           options: {
             var rows = []
             for (var i = 0; i < monitorModel.count; i++) {
               var row = monitorModel.get(i)
-              rows.push({ value: row.name, label: row.name + (row.connected ? " · online" : " · offline") })
+              rows.push({ value: row.name, label: I18n.t(root.locale, row.connected ? "monitor.namedOnline" : "monitor.namedOffline", { name: row.name }) })
             }
             return rows
           }
           value: root.selectedMonitor
           Accessible.role: Accessible.ComboBox
-          Accessible.name: "Monitor"
-          Accessible.description: "Current value: " + monitorDropdown.currentLabel()
+          Accessible.name: I18n.t(root.locale, "monitor.label")
+          Accessible.description: I18n.t(root.locale, "common.currentValue", { value: monitorDropdown.currentLabel() })
           onChanged: function(value) { root.selectMonitor(value) }
         }
 
@@ -652,7 +671,7 @@ Item {
               anchors.fill: parent
               anchors.margins: Style.space(8)
               spacing: Style.space(6)
-              Text { text: "MONITORS"; color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
+              Text { text: I18n.t(root.locale, "monitor.heading"); color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
               ListView {
                 id: monitorList
                 Layout.fillWidth: true
@@ -668,14 +687,22 @@ Item {
                   required property string mode
                   required property int index
                   width: ListView.view.width
-                  text: name + "  ·  " + (primary ? "PRIMARY / FULL" : (configured ? mode.toUpperCase() : "HIDDEN / NEW"))
+                  text: primary
+                    ? I18n.t(root.locale, "monitor.primaryFull", { name: name })
+                    : (configured
+                      ? I18n.t(root.locale, "monitor.namedMode", { name: name, mode: root.modeLabel(mode) })
+                      : I18n.t(root.locale, "monitor.hiddenNew", { name: name }))
                   iconText: connected ? "󰍹" : "󰍺"
                   leftAlign: true
                   bordered: true
                   selected: root.selectedMonitor === name
                   focusable: true
-                  tooltipText: (primary ? "Primary · " : "") + (configured ? mode : "hidden · unsaved") + (connected ? " · online" : " · offline")
-                  Accessible.name: name + ", " + tooltipText
+                  tooltipText: I18n.t(root.locale, "monitor.summary", {
+                    primary: primary ? I18n.t(root.locale, "monitor.primary") : I18n.t(root.locale, "monitor.secondary"),
+                    mode: configured ? root.modeLabel(mode) : I18n.t(root.locale, "monitor.hiddenUnsaved"),
+                    connection: connected ? I18n.t(root.locale, "monitor.online") : I18n.t(root.locale, "monitor.offline")
+                  })
+                  Accessible.name: I18n.t(root.locale, "monitor.accessibleSummary", { name: name, summary: tooltipText })
                   Accessible.role: Accessible.RadioButton
                   Accessible.checked: selected
                   Accessible.selected: selected
@@ -716,22 +743,23 @@ Item {
                   ColumnLayout {
                     Layout.fillWidth: true
                     spacing: 0
-                    Text { text: root.selectedMonitor || "No monitor"; color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.subtitle; font.bold: true }
+                    Text { text: root.selectedMonitor || I18n.t(root.locale, "monitor.none"); color: root.foreground; font.family: root.fontFamily; font.pixelSize: Style.font.subtitle; font.bold: true }
                     Text {
                       text: !root.selectedMonitor ? ""
-                        : (root.isConnected(root.selectedMonitor) ? "CONNECTED" : "OFFLINE")
-                          + (root.selectedMonitor === root.draft.primary ? "  ·  PRIMARY" : "")
+                        : I18n.t(root.locale,
+                            root.selectedMonitor === root.draft.primary ? "monitor.connectionPrimary" : "monitor.connection",
+                            { connection: root.isConnected(root.selectedMonitor) ? I18n.t(root.locale, "monitor.connected") : I18n.t(root.locale, "monitor.offline") })
                       color: root.isConnected(root.selectedMonitor) ? root.accent : Qt.darker(root.foreground, 1.5)
                       font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true
                     }
                   }
                   Button {
                     visible: root.selectedMonitor && root.selectedMonitor !== root.draft.primary
-                    text: "Make primary"
+                    text: I18n.t(root.locale, "monitor.makePrimary")
                     bordered: true
                     focusable: true
                     Accessible.role: Accessible.Button
-                    Accessible.name: "Make " + root.selectedMonitor + " the primary monitor"
+                    Accessible.name: I18n.t(root.locale, "monitor.makeNamedPrimary", { name: root.selectedMonitor })
                     onClicked: root.makePrimary()
                   }
                 }
@@ -741,28 +769,28 @@ Item {
                 ColumnLayout {
                   Layout.fillWidth: true
                   spacing: Style.space(7)
-                  Text { text: "MODE"; color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
+                  Text { text: I18n.t(root.locale, "mode.heading"); color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
                   ButtonGroup {
                     id: modeGroup
                     options: [
-                      { value: "full", label: "Full" },
-                      { value: "minimal", label: "Minimal" },
-                      { value: "hidden", label: "Hidden" }
+                      { value: "full", label: I18n.t(root.locale, "mode.full") },
+                      { value: "minimal", label: I18n.t(root.locale, "mode.minimal") },
+                      { value: "hidden", label: I18n.t(root.locale, "mode.hidden") }
                     ]
                     value: root.selectedOutput ? root.selectedOutput.mode : "hidden"
                     onChanged: function(value) { root.setMode(value) }
                     Accessible.role: Accessible.Grouping
-                    Accessible.name: "Bar mode for " + root.selectedMonitor
-                    Accessible.description: "Current mode: " + modeGroup.value
+                    Accessible.name: I18n.t(root.locale, "mode.forMonitor", { name: root.selectedMonitor })
+                    Accessible.description: I18n.t(root.locale, "mode.current", { mode: root.modeLabel(modeGroup.value) })
                   }
                   Text {
                     visible: root.selectedMonitor === root.draft.primary
-                    text: "Primary is locked to Full."
+                    text: I18n.t(root.locale, "mode.primaryLocked")
                     color: Qt.darker(root.foreground, 1.45); font.family: root.fontFamily; font.pixelSize: Style.font.caption
                   }
                   Text {
                     visible: !root.selectedOutput
-                    text: "This connected monitor is hidden and not yet saved. Choose a mode to configure it."
+                    text: I18n.t(root.locale, "mode.unconfigured")
                     color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; wrapMode: Text.WordWrap
                     Layout.fillWidth: true
                   }
@@ -773,16 +801,16 @@ Item {
                   Layout.fillWidth: true
                   spacing: Style.space(10)
 
-                  Text { text: "MINIMAL BAR"; color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
+                  Text { text: I18n.t(root.locale, "minimal.heading"); color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
                   RowLayout {
                     Layout.fillWidth: true
                     spacing: Style.space(10)
                     TextField {
                       id: glyphField
                       Layout.fillWidth: true
-                      placeholderText: "Monitor glyph"
+                      placeholderText: I18n.t(root.locale, "minimal.glyph")
                       text: root.selectedOutput && typeof root.selectedOutput.glyph === "string" ? root.selectedOutput.glyph : ""
-                      Accessible.name: "Glyph for " + root.selectedMonitor
+                      Accessible.name: I18n.t(root.locale, "minimal.glyphFor", { name: root.selectedMonitor })
                       onActiveFocusChanged: if (activeFocus) root.ensureFocusedVisible(glyphField)
                       onTextEdited: {
                         if (root.selectedOutput) root.selectedOutput.glyph = text
@@ -795,15 +823,15 @@ Item {
                       color: Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.05)
                       borderSpec: Border.flat(Qt.rgba(root.foreground.r, root.foreground.g, root.foreground.b, 0.15), 1)
                       Text { anchors.centerIn: parent; text: glyphField.text || "·"; color: root.foreground; font.family: "Noto Sans Symbols 2"; font.pixelSize: Style.font.iconLarge }
-                      Accessible.name: "Glyph preview " + glyphField.text
+                      Accessible.name: I18n.t(root.locale, "minimal.glyphPreview", { glyph: glyphField.text })
                     }
                   }
 
                   RowLayout {
                     Layout.fillWidth: true
-                    Text { text: "WORKSPACES"; color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
+                    Text { text: I18n.t(root.locale, "workspace.heading"); color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
                     Item { Layout.fillWidth: true }
-                    Button { id: addWorkspaceButton; text: "Add"; iconText: "+"; bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: "Add workspace"; onActiveFocusChanged: if (activeFocus) root.ensureFocusedVisible(addWorkspaceButton); onClicked: root.addWorkspace() }
+                    Button { id: addWorkspaceButton; text: I18n.t(root.locale, "action.add"); iconText: "+"; bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "workspace.add"); onActiveFocusChanged: if (activeFocus) root.ensureFocusedVisible(addWorkspaceButton); onClicked: root.addWorkspace() }
                   }
 
                   Repeater {
@@ -815,7 +843,7 @@ Item {
                       Layout.fillWidth: true
                       spacing: Style.space(8)
                       Accessible.role: Accessible.ListItem
-                      Accessible.name: "Workspace row " + (index + 1)
+                      Accessible.name: I18n.t(root.locale, "workspace.row", { row: index + 1 })
 
                       property alias idField: workspaceIdField
                       property alias removeButton: removeWorkspaceButton
@@ -824,9 +852,9 @@ Item {
                         id: workspaceIdField
                         Layout.preferredWidth: 100
                         text: String(modelData.id)
-                        placeholderText: "ID"
+                        placeholderText: I18n.t(root.locale, "workspace.id")
                         inputMethodHints: Qt.ImhDigitsOnly
-                        Accessible.name: "Workspace ID row " + (index + 1)
+                        Accessible.name: I18n.t(root.locale, "workspace.idRow", { row: index + 1 })
                         onActiveFocusChanged: if (activeFocus) root.ensureFocusedVisible(workspaceIdField)
                         onTextEdited: { modelData.id = Number(text); root.validationSerial++ }
                       }
@@ -834,20 +862,20 @@ Item {
                         id: workspaceLabelField
                         Layout.fillWidth: true
                         text: String(modelData.label)
-                        placeholderText: "Label"
-                        Accessible.name: "Workspace label row " + (index + 1)
+                        placeholderText: I18n.t(root.locale, "workspace.label")
+                        Accessible.name: I18n.t(root.locale, "workspace.labelRow", { row: index + 1 })
                         onActiveFocusChanged: if (activeFocus) root.ensureFocusedVisible(workspaceLabelField)
                         onTextEdited: { modelData.label = text; root.validationSerial++ }
                       }
                       Button {
                         id: removeWorkspaceButton
-                        text: "Remove"
+                        text: I18n.t(root.locale, "action.remove")
                         iconText: "󰅖"
                         bordered: true
                         focusable: true
                         foreground: root.urgent
                         Accessible.role: Accessible.Button
-                        Accessible.name: "Remove workspace row " + (index + 1)
+                        Accessible.name: I18n.t(root.locale, "workspace.removeRow", { row: index + 1 })
                         onActiveFocusChanged: if (activeFocus) root.ensureFocusedVisible(removeWorkspaceButton)
                         onClicked: root.removeWorkspace(index)
                       }
@@ -880,7 +908,7 @@ Item {
           ColumnLayout {
             Layout.fillWidth: true
             spacing: 0
-            Text { text: "STOCK BAR COPY"; color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
+            Text { text: I18n.t(root.locale, "sync.heading"); color: Qt.darker(root.foreground, 1.35); font.family: root.fontFamily; font.pixelSize: Style.font.caption; font.bold: true }
             Text {
               text: root.sourceError || root.syncMessage
               color: root.sourceError || root.syncState === "error" || root.syncState === "unsupported" ? root.urgent
@@ -893,18 +921,18 @@ Item {
               Accessible.description: root.sourceError || root.syncDetail
             }
           }
-          Button { Layout.fillWidth: root.compact; text: root.syncState === "checking" ? "Checking…" : "Check"; bordered: true; focusable: true; enabled: !syncProcess.running && !!root.sourceDir; opacity: enabled ? 1 : 0.5; tooltipText: root.sourceError || root.syncDetail; Accessible.role: Accessible.Button; Accessible.name: "Check stock bar copy"; Accessible.description: tooltipText; onClicked: root.runCheck() }
-          Button { Layout.fillWidth: root.compact; text: root.syncState === "syncing" ? "Syncing…" : "Sync"; bordered: true; focusable: true; enabled: !syncProcess.running && !!root.sourceDir; opacity: enabled ? 1 : 0.5; tooltipText: root.sourceError || root.syncDetail; Accessible.role: Accessible.Button; Accessible.name: "Sync stock bar copy"; Accessible.description: tooltipText; onClicked: root.runSync() }
+          Button { Layout.fillWidth: root.compact; text: root.syncState === "checking" ? I18n.t(root.locale, "action.checking") : I18n.t(root.locale, "action.check"); bordered: true; focusable: true; enabled: !syncProcess.running && !!root.sourceDir; opacity: enabled ? 1 : 0.5; tooltipText: root.sourceError || root.syncDetail; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "sync.checkCopy"); Accessible.description: tooltipText; onClicked: root.runCheck() }
+          Button { Layout.fillWidth: root.compact; text: root.syncState === "syncing" ? I18n.t(root.locale, "action.syncing") : I18n.t(root.locale, "action.sync"); bordered: true; focusable: true; enabled: !syncProcess.running && !!root.sourceDir; opacity: enabled ? 1 : 0.5; tooltipText: root.sourceError || root.syncDetail; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "sync.syncCopy"); Accessible.description: tooltipText; onClicked: root.runSync() }
           Button {
             Layout.fillWidth: root.compact
-            text: "Restart shell"
+            text: I18n.t(root.locale, "action.restartShell")
             bordered: true
             focusable: true
             enabled: root.canRestart
             opacity: enabled ? 1 : 0.5
             Accessible.role: Accessible.Button
-            Accessible.name: "Restart shell"
-            Accessible.description: root.dirty ? "Save or discard changes before restarting" : (syncProcess.running ? "Wait for the stock bar task to finish" : "Requires confirmation")
+            Accessible.name: I18n.t(root.locale, "action.restartShell")
+            Accessible.description: root.dirty ? I18n.t(root.locale, "restart.saveFirst") : (syncProcess.running ? I18n.t(root.locale, "restart.waitForTask") : I18n.t(root.locale, "restart.requiresConfirmation"))
             onClicked: root.armRestart()
           }
         }
@@ -917,8 +945,8 @@ Item {
         visible: root.restartArmed
         focus: visible
         Accessible.role: Accessible.Dialog
-        Accessible.name: "Restart shell confirmation"
-        Accessible.description: "Use Left, Right, Tab, or Shift+Tab to choose Cancel or Restart now. Press Enter or Space to activate."
+        Accessible.name: I18n.t(root.locale, "restart.confirmation")
+        Accessible.description: I18n.t(root.locale, "restart.keyboardHelp")
         Keys.priority: Keys.BeforeItem
         Keys.onPressed: function(event) {
           if (event.key === Qt.Key_Space) {
@@ -934,9 +962,9 @@ Item {
           id: restartConfirm
           anchors.fill: parent
           opened: root.restartArmed
-          message: "Restart the shell now? This closes the settings panel."
-          cancelText: "Cancel"
-          confirmText: "Restart now"
+          message: I18n.t(root.locale, "restart.prompt")
+          cancelText: I18n.t(root.locale, "action.cancel")
+          confirmText: I18n.t(root.locale, "action.restartNow")
           foreground: root.foreground
           fontFamily: root.fontFamily
           onCanceled: root.cancelRestart()
@@ -951,7 +979,7 @@ Item {
         visible: root.closeConfirmOpen
         focus: visible
         Accessible.role: Accessible.Dialog
-        Accessible.name: "Unsaved changes"
+        Accessible.name: I18n.t(root.locale, "close.unsavedChanges")
         Keys.onEscapePressed: root.cancelCloseConfirm()
 
         Rectangle {
@@ -978,7 +1006,7 @@ Item {
 
             Text {
               Layout.fillWidth: true
-              text: "Save changes before closing?"
+              text: I18n.t(root.locale, "close.savePrompt")
               color: root.foreground
               font.family: root.fontFamily
               font.pixelSize: Style.font.title
@@ -987,7 +1015,7 @@ Item {
             Text {
               visible: root.validationError || root.externalConflict
               Layout.fillWidth: true
-              text: root.validationError ? root.validationError : "The config changed outside this panel. Reload or rebase before saving."
+              text: root.validationError ? root.validationError : I18n.t(root.locale, "conflict.reloadBeforeSave")
               color: root.urgent
               font.family: root.fontFamily
               font.pixelSize: Style.font.bodySmall
@@ -1000,9 +1028,9 @@ Item {
               rowSpacing: Style.space(8)
               columnSpacing: Style.space(8)
               Item { visible: !root.compact; Layout.fillWidth: true }
-              Button { id: cancelCloseButton; Layout.fillWidth: root.compact; text: "Cancel"; bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: "Cancel closing"; KeyNavigation.tab: discardCloseButton; KeyNavigation.backtab: saveCloseButton; onClicked: root.cancelCloseConfirm() }
-              Button { id: discardCloseButton; Layout.fillWidth: root.compact; text: "Discard"; bordered: true; focusable: true; foreground: root.urgent; Accessible.role: Accessible.Button; Accessible.name: "Discard changes and close"; KeyNavigation.tab: saveCloseButton; KeyNavigation.backtab: cancelCloseButton; onClicked: root.discardAndClose() }
-              Button { id: saveCloseButton; Layout.fillWidth: root.compact; text: "Save"; bordered: true; focusable: true; enabled: !root.validationError && !root.externalConflict; opacity: enabled ? 1 : 0.45; Accessible.role: Accessible.Button; Accessible.name: "Save changes and close"; Accessible.description: enabled ? "" : "Fix validation or resolve the external conflict first"; KeyNavigation.tab: cancelCloseButton; KeyNavigation.backtab: discardCloseButton; onClicked: root.saveAndClose() }
+              Button { id: cancelCloseButton; Layout.fillWidth: root.compact; text: I18n.t(root.locale, "action.cancel"); bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "close.cancel"); KeyNavigation.tab: discardCloseButton; KeyNavigation.backtab: saveCloseButton; onClicked: root.cancelCloseConfirm() }
+              Button { id: discardCloseButton; Layout.fillWidth: root.compact; text: I18n.t(root.locale, "action.discard"); bordered: true; focusable: true; foreground: root.urgent; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "close.discard"); KeyNavigation.tab: saveCloseButton; KeyNavigation.backtab: cancelCloseButton; onClicked: root.discardAndClose() }
+              Button { id: saveCloseButton; Layout.fillWidth: root.compact; text: I18n.t(root.locale, "action.save"); bordered: true; focusable: true; enabled: !root.validationError && !root.externalConflict; opacity: enabled ? 1 : 0.45; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "close.save"); Accessible.description: enabled ? "" : I18n.t(root.locale, "close.fixFirst"); KeyNavigation.tab: cancelCloseButton; KeyNavigation.backtab: discardCloseButton; onClicked: root.saveAndClose() }
             }
           }
         }
@@ -1021,7 +1049,7 @@ Item {
         borderSpec: Border.flat(root.urgent, Style.normalBorderWidth)
         radius: Style.cornerRadius
         Accessible.role: Accessible.AlertMessage
-        Accessible.name: "External config change detected. Save is blocked."
+        Accessible.name: I18n.t(root.locale, "conflict.detected")
 
         GridLayout {
           id: conflictContent
@@ -1030,9 +1058,9 @@ Item {
           columns: root.compact ? 1 : 3
           rowSpacing: Style.space(8)
           columnSpacing: Style.space(8)
-          Text { Layout.fillWidth: true; text: "Config changed outside this panel. Reload it, or rebase this draft onto the new config."; color: root.urgent; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; wrapMode: Text.WordWrap }
-          Button { Layout.fillWidth: root.compact; text: "Reload"; bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: "Reload external config and discard this draft"; onClicked: root.reloadExternal() }
-          Button { Layout.fillWidth: root.compact; text: "Rebase draft"; bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: "Rebase this draft onto the external config"; onClicked: root.rebaseDraft() }
+          Text { Layout.fillWidth: true; text: I18n.t(root.locale, "conflict.message"); color: root.urgent; font.family: root.fontFamily; font.pixelSize: Style.font.bodySmall; wrapMode: Text.WordWrap }
+          Button { Layout.fillWidth: root.compact; text: I18n.t(root.locale, "action.reload"); bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "conflict.reloadDiscard"); onClicked: root.reloadExternal() }
+          Button { Layout.fillWidth: root.compact; text: I18n.t(root.locale, "action.rebase"); bordered: true; focusable: true; Accessible.role: Accessible.Button; Accessible.name: I18n.t(root.locale, "conflict.rebaseA11y"); onClicked: root.rebaseDraft() }
         }
       }
     }
