@@ -67,6 +67,18 @@ def transform_bar(source: str) -> str:
   property var manifest: null
   property var monitorConfig: MonitorBarModel.defaultConfig([])
   property string monitorConfigText: ""
+  property var monitorShellConfig: ({})
+  FileView {
+    path: root.omarchyConfigDir + "/shell.json"
+    watchChanges: true
+    onFileChanged: reload()
+    onLoaded: {
+      try {
+        root.monitorShellConfig = JSON.parse(text())
+        root.applyBarConfig()
+      } catch (error) { console.warn("monitor-bar config: " + error) }
+    }
+  }
 """,
     )
     text = replace_exact(
@@ -81,7 +93,7 @@ def transform_bar(source: str) -> str:
     barConfigSerial++
 """,
         """    var nextMonitorConfig = MonitorBarModel.configFromShell(
-      shell && shell.shellConfig ? shell.shellConfig : ({}),
+      Object.assign({}, monitorShellConfig, { bar: barConfig }),
       connectedMonitorNames()
     )
     var nextMonitorConfigText = MonitorBarModel.serializeConfig(nextMonitorConfig)
@@ -115,7 +127,7 @@ def transform_bar(source: str) -> str:
   }
 
   // --- patrickfanella.monitor-bar: screen-local synthetic layouts ---
-  readonly property string monitorAssetDir: manifest && manifest.__sourceDir ? String(manifest.__sourceDir) : ""
+  readonly property string monitorAssetDir: Qt.resolvedUrl(".").toString()
   readonly property string monitorGlyphWidgetSource: monitorAssetSource("MonitorGlyph.qml")
   readonly property string monitorWorkspaceWidgetSource: monitorAssetSource("Workspaces.qml")
   readonly property string monitorSettingsWidgetSource: monitorAssetSource("SettingsButton.qml")
@@ -131,7 +143,7 @@ def transform_bar(source: str) -> str:
   }
 
   function monitorAssetSource(name) {
-    return monitorAssetDir ? Util.fileUrl(monitorAssetDir + "/" + name) : ""
+    return Qt.resolvedUrl(name).toString()
   }
 
   function copyEntry(entry) {

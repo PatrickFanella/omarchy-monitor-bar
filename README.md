@@ -79,9 +79,9 @@ omarchy plugin remove patrickfanella.monitor-bar --yes
 
 ## Configuration and recovery
 
-The plugin stores its monitor configuration under the `patrickfanella.monitor-bar` key in `~/.config/omarchy/shell.json`. It also sets `bar.id`, `bar.position`, and `bar.transparent` through the Omarchy shell API. It does not edit `shell.settings`.
+The plugin stores its monitor configuration under the `bar["patrickfanella.monitor-bar"]` key in `~/.config/omarchy/shell.json`. Legacy top-level monitor settings remain readable; selecting Save writes the bar-scoped configuration. It also sets `bar.id`, `bar.position`, and `bar.transparent` through the Omarchy shell API. It does not edit `shell.settings`.
 
-The settings panel changes `shell.json` only after you select **Save**. Full-bar position, transparency, and widget-reordering actions inherited from the stock bar also update their related `bar` fields after you perform those actions. **Sync** updates the generated bar files inside the plugin checkout after you select it and only when the installed stock-source hashes match. The plugin uses no network service, telemetry, or `sudo`.
+The settings panel changes `shell.json` only after you select **Save**. Full-bar position, transparency, and widget-reordering actions inherited from the stock bar also update their related `bar` fields after you perform those actions. **Sync** updates the generated bar files inside the plugin checkout after you select it and only when the installed stock-source hashes match. All plugin processes run as the logged-in desktop user. The plugin does not request elevated privileges, use a network service, or collect telemetry.
 
 If the monitor configuration is absent, the first connected monitor becomes the primary Full monitor. Unknown monitors default to Hidden. The settings panel keeps disconnected configured monitors so you can edit their saved settings while they are offline.
 

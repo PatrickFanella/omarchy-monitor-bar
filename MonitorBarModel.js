@@ -114,6 +114,8 @@ function hasCanonicalConfig(shellConfig) {
 }
 
 function configFromShell(shellConfig, connectedMonitorNames) {
+  if (shellConfig && hasCanonicalConfig(shellConfig.bar))
+    return normalizeConfig(shellConfig.bar[CONFIG_KEY])
   if (!hasCanonicalConfig(shellConfig))
     return defaultConfig(connectedMonitorNames)
   return normalizeConfig(shellConfig[CONFIG_KEY])

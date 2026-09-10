@@ -23,6 +23,18 @@ Item {
   property var manifest: null
   property var monitorConfig: MonitorBarModel.defaultConfig([])
   property string monitorConfigText: ""
+  property var monitorShellConfig: ({})
+  FileView {
+    path: root.omarchyConfigDir + "/shell.json"
+    watchChanges: true
+    onFileChanged: reload()
+    onLoaded: {
+      try {
+        root.monitorShellConfig = JSON.parse(text())
+        root.applyBarConfig()
+      } catch (error) { console.warn("monitor-bar config: " + error) }
+    }
+  }
   // Mirrors the on-disk `bar-off` flag so the user can hide the bar without
   // killing the entire shell. Hidden panels stay mapped but park off-screen
   // without an exclusion zone; updated by the FileView watcher further down.
@@ -362,7 +374,7 @@ Item {
     // every monitor. When a shell.json write only changed inline widget
     // settings, patch the live layout and running widgets in place instead.
     var nextMonitorConfig = MonitorBarModel.configFromShell(
-      shell && shell.shellConfig ? shell.shellConfig : ({}),
+      Object.assign({}, monitorShellConfig, { bar: barConfig }),
       connectedMonitorNames()
     )
     var nextMonitorConfigText = MonitorBarModel.serializeConfig(nextMonitorConfig)
@@ -614,7 +626,7 @@ Item {
   }
 
   // --- patrickfanella.monitor-bar: screen-local synthetic layouts ---
-  readonly property string monitorAssetDir: manifest && manifest.__sourceDir ? String(manifest.__sourceDir) : ""
+  readonly property string monitorAssetDir: Qt.resolvedUrl(".").toString()
   readonly property string monitorGlyphWidgetSource: monitorAssetSource("MonitorGlyph.qml")
   readonly property string monitorWorkspaceWidgetSource: monitorAssetSource("Workspaces.qml")
   readonly property string monitorSettingsWidgetSource: monitorAssetSource("SettingsButton.qml")
@@ -630,7 +642,7 @@ Item {
   }
 
   function monitorAssetSource(name) {
-    return monitorAssetDir ? Util.fileUrl(monitorAssetDir + "/" + name) : ""
+    return Qt.resolvedUrl(name).toString()
   }
 
   function copyEntry(entry) {
