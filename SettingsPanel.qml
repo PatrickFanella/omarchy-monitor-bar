@@ -20,6 +20,20 @@ Item {
   readonly property string locale: I18n.currentLocale()
   property bool closingFromHost: false
 
+  property var savedShellConfig: ({})
+  function currentConfig() {
+    return Object.assign({}, savedShellConfig, { bar: shell && shell.barConfig ? shell.barConfig : (savedShellConfig.bar || {}) })
+  }
+  FileView {
+    path: (Quickshell.env("XDG_CONFIG_HOME") || Quickshell.env("HOME") + "/.config") + "/omarchy/shell.json"
+    watchChanges: true
+    onFileChanged: reload()
+    onLoaded: {
+      try { root.savedShellConfig = JSON.parse(text()); root.handleShellConfigChanged() }
+      catch (error) { console.warn("monitor-bar config: " + error) }
+    }
+  }
+
   property var draft: MonitorBarModel.defaultConfig([])
   property string position: "top"
   property bool transparent: false
@@ -49,7 +63,7 @@ Item {
   }
   readonly property string validationError: validateDraft()
   readonly property bool dirty: snapshot() !== baselineSnapshot
-  readonly property string sourceDir: manifest && manifest.__sourceDir ? String(manifest.__sourceDir) : ""
+  readonly property string sourceDir: decodeURIComponent(Qt.resolvedUrl(".").toString().replace(/^file:\/\//, "")).replace(/\/$/, "")
   readonly property string sourceError: sourceDir ? "" : I18n.t(locale, "sync.sourceUnavailable")
   readonly property bool canRestart: !syncProcess.running
     && !dirty && !validationError && !externalConflict
@@ -260,7 +274,7 @@ Item {
   }
 
   function loadDraft() {
-    var config = shell && shell.shellConfig ? shell.shellConfig : ({})
+    var config = currentConfig()
     draft = MonitorBarModel.configFromShell(config, connectedNames())
     position = config.bar && typeof config.bar.position === "string" ? config.bar.position : "top"
     transparent = !!(config.bar && config.bar.transparent)
@@ -280,26 +294,27 @@ Item {
     var savedTransparent = transparent
     writingConfig = true
     try {
-      shell.mutateShellConfig(function(config) {
+      var accepted = shell.mutateShellConfig(function(config) {
         if (!config.bar || typeof config.bar !== "object" || Array.isArray(config.bar)) config.bar = {}
         config.bar.id = "patrickfanella.monitor-bar"
         config.bar.position = savedPosition
         config.bar.transparent = savedTransparent
-        config[MonitorBarModel.CONFIG_KEY] = savedMonitor
+        config.bar[MonitorBarModel.CONFIG_KEY] = savedMonitor
       })
+      if (accepted === false) return
     } finally {
       writingConfig = false
     }
     draft = savedMonitor
     draftSerial++
     baselineSnapshot = snapshot()
-    externalSnapshot = relevantShellSnapshot(shell.shellConfig)
+    externalSnapshot = relevantShellSnapshot(currentConfig())
     refreshMonitors()
   }
 
   function handleShellConfigChanged() {
     if (writingConfig || !shell) return
-    var nextSnapshot = relevantShellSnapshot(shell.shellConfig)
+    var nextSnapshot = relevantShellSnapshot(currentConfig())
     if (nextSnapshot === externalSnapshot) return
     if (!window.visible) {
       externalSnapshot = nextSnapshot
@@ -321,8 +336,8 @@ Item {
 
   function rebaseDraft() {
     if (!shell) return
-    baselineSnapshot = draftSnapshotFromShell(shell.shellConfig)
-    externalSnapshot = relevantShellSnapshot(shell.shellConfig)
+    baselineSnapshot = draftSnapshotFromShell(currentConfig())
+    externalSnapshot = relevantShellSnapshot(currentConfig())
     externalConflict = false
     Qt.callLater(function() { closeButton.forceActiveFocus() })
   }
@@ -474,7 +489,7 @@ Item {
   Connections {
     target: Quickshell
     function onScreensChanged() {
-      var config = root.shell && root.shell.shellConfig ? root.shell.shellConfig : ({})
+      var config = root.currentConfig()
       var canonical = MonitorBarModel.hasCanonicalConfig(config)
       if (!canonical && !root.dirty) root.loadDraft()
       else root.refreshMonitors()
@@ -483,6 +498,8 @@ Item {
 
   Connections {
     target: root.shell
+    ignoreUnknownSignals: true
+    function onBarConfigChanged() { root.handleShellConfigChanged() }
     function onShellConfigChanged() { root.handleShellConfigChanged() }
   }
 

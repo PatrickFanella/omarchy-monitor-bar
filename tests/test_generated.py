@@ -25,7 +25,7 @@ class GeneratedBarTest(unittest.TestCase):
         self.assertIn('root.isPrimaryScreen(slot.screenName)', bar)
         self.assertNotIn('screenName === "DP-1"', bar)
         self.assertNotIn('screenName !== "DP-1"', bar)
-        self.assertIn("MonitorBarModel.configFromShell(\n      shell && shell.shellConfig ? shell.shellConfig : ({}),\n      connectedMonitorNames()", bar)
+        self.assertIn("MonitorBarModel.configFromShell(\n      Object.assign({}, monitorShellConfig, { bar: barConfig }),\n      connectedMonitorNames()", bar)
         self.assertIn("function onScreensChanged() { root.applyBarConfig() }", bar)
         self.assertIn("WlrLayershell.keyboardFocus: WlrKeyboardFocus.None", bar)
 
@@ -36,7 +36,8 @@ class GeneratedBarTest(unittest.TestCase):
 
     def test_assets_resolve_from_manifest_source_dir(self) -> None:
         bar = (ROOT / "Bar.qml").read_text(encoding="utf-8")
-        self.assertIn("manifest && manifest.__sourceDir", bar)
+        self.assertNotIn("manifest.__sourceDir", bar)
+        self.assertIn("Qt.resolvedUrl(name).toString()", bar)
         self.assertIn('monitorAssetSource("MonitorGlyph.qml")', bar)
         self.assertIn('monitorAssetSource("Workspaces.qml")', bar)
         self.assertIn('monitorAssetSource("SettingsButton.qml")', bar)

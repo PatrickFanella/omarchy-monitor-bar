@@ -70,3 +70,34 @@ assert.equal(shell.untouched, true)
 assert.deepEqual(JSON.parse(model.serializeConfig(normalized)), plain(shell[model.CONFIG_KEY]))
 
 console.log("MonitorBarModel tests passed")
+
+// A scoped host retains only bar. The new location wins over legacy settings.
+const legacy = { primary: "DP-1", outputs: { "DP-1": { mode: "full" } } }
+const scoped = { primary: "DP-3", outputs: { "DP-3": { mode: "full" }, "DP-1": { mode: "minimal", glyph: "x" } } }
+assert.equal(model.configFromShell({ [model.CONFIG_KEY]: legacy }, []).primary, "DP-1")
+assert.equal(model.configFromShell({ bar: { [model.CONFIG_KEY]: scoped }, [model.CONFIG_KEY]: legacy }, []).primary, "DP-3")
+assert.equal(model.configFromShell({ bar: { [model.CONFIG_KEY]: scoped } }, []).outputs["DP-1"].mode, "minimal")
+
+// Exercise the real panel Save handler against a host that exposes only bar.
+const panel = fs.readFileSync(new URL("../SettingsPanel.qml", import.meta.url), "utf8")
+const saveSource = panel.match(/^  function save\([^]*?^  }/m)[0]
+const stored = { bar: { id: "omarchy.bar", layout: {right: [{id: "keep.me"}]} }, idle: {lock: 300} }
+const context = {
+  validationError: "", externalConflict: false, draft: scoped, position: "bottom", transparent: true,
+  writingConfig: false, MonitorBarModel: model, clone: plain, draftSerial: 0,
+  snapshot: () => "saved", baselineSnapshot: "dirty", externalSnapshot: "",
+  currentConfig: () => stored, relevantShellSnapshot: JSON.stringify, refreshMonitors: () => {},
+  shell: {mutateShellConfig: mutate => {
+    const exposed = {bar: plain(stored.bar)}; mutate(exposed); stored.bar = exposed.bar; return true
+  }}
+}
+vm.runInNewContext(saveSource + ";save()", context)
+assert.equal(stored.bar[model.CONFIG_KEY].primary, "DP-3")
+assert.equal(stored.bar.position, "bottom")
+assert.equal(stored.bar.layout.right[0].id, "keep.me")
+assert.equal(stored.idle.lock, 300)
+context.baselineSnapshot = "dirty"
+context.shell.mutateShellConfig = () => false
+vm.runInNewContext(saveSource + ";save()", context)
+assert.equal(context.baselineSnapshot, "dirty")
+assert.equal(context.writingConfig, false)
