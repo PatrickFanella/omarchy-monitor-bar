@@ -1,6 +1,6 @@
 # Third-party notices
 
-`Bar.qml` and `BarModel.js` are generated from and derive from the Omarchy stock bar sources. `Workspaces.qml` derives from Omarchy's stock `Workspaces.qml`. The byte-for-byte upstream snapshots under `vendor/omarchy-4.0.1-1/bar` contain the pinned Omarchy sources used for reproducible generation checks. Omarchy is Copyright David Heinemeier Hansson and distributed under the following MIT notice:
+`Bar.qml` and `BarModel.js` are generated from and derive from the Omarchy stock bar sources. `Workspaces.qml` derives from Omarchy's stock `Workspaces.qml`. The byte-for-byte upstream snapshots under `vendor/omarchy-4.0.4-1/bar` contain the pinned Omarchy sources used for reproducible generation checks. Omarchy is Copyright David Heinemeier Hansson and distributed under the following MIT notice:
 
 > Copyright (c) David Heinemeier Hansson
 >

@@ -20,7 +20,7 @@ done
 
 if [[ ! -d "$OMARCHY_SHELL_DIR" ]]; then
   printf 'validate.sh: Omarchy shell directory not found: %s\n' "$OMARCHY_SHELL_DIR" >&2
-  printf 'Run this check on the supported Omarchy system with package 4.0.1-1 installed.\n' >&2
+  printf 'Run this check on the supported Omarchy system with package 4.0.4-1 installed.\n' >&2
   exit 1
 fi
 
@@ -35,7 +35,7 @@ node tests/test_bar_model.mjs
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m py_compile tools/*.py tests/*.py
 python3 tools/sync_stock_bar.py --check
-python3 tools/sync_stock_bar.py --upstream-dir vendor/omarchy-4.0.1-1/bar --check
+python3 tools/sync_stock_bar.py --upstream-dir vendor/omarchy-4.0.4-1/bar --check
 qmllint -I "$OMARCHY_SHELL_DIR" ./*.qml
 omarchy plugin validate .
 python3 -c 'import json, pathlib; json.loads(pathlib.Path("manifest.json").read_text(encoding="utf-8"))'

@@ -91,7 +91,7 @@ The bar inherits trusted local command behavior from the stock Omarchy bar. Enab
 
 ## Compatibility and stock sync policy
 
-Release `1.0.0` supports only Omarchy package `4.0.1-1`. `tools/sync_stock_bar.py` verifies the pinned SHA-256 hashes before generating `Bar.qml` and `BarModel.js`. The immutable source snapshots in `vendor/omarchy-4.0.1-1/bar` make this check reproducible in CI; the settings panel and the default CLI invocation check the installed sources. A maintainer must review upstream changes, update the snapshots, transforms, tests, and both hashes before claiming support for another package version.
+The installed compatibility update supports Omarchy package `4.0.4-1`. `tools/sync_stock_bar.py` verifies the pinned SHA-256 hashes before generating `Bar.qml` and `BarModel.js`. The immutable source snapshots in `vendor/omarchy-4.0.4-1/bar` make this check reproducible in CI; the settings panel and the default CLI invocation check the installed sources. A maintainer must review upstream changes, update the snapshots, transforms, tests, and both hashes before claiming support for another package version.
 
 Do not edit generated files. Change `tools/sync_stock_bar.py`, then run:
 
@@ -102,7 +102,7 @@ python3 tools/sync_stock_bar.py
 To check generated files against the pinned snapshot instead of installed sources, run:
 
 ```sh
-python3 tools/sync_stock_bar.py --upstream-dir vendor/omarchy-4.0.1-1/bar --check
+python3 tools/sync_stock_bar.py --upstream-dir vendor/omarchy-4.0.4-1/bar --check
 ```
 
 ## Develop and validate
