@@ -18,7 +18,7 @@ The plugin follows the system UI language when the Omarchy shell starts. It supp
 
 ## Runtime dependencies
 
-- Omarchy package `4.0.1-1`
+- Omarchy package `4.0.4-1`
 - Quickshell, Hyprland, `hyprctl`, and the Omarchy shell commands included with that package
 - `Noto Sans Symbols 2`, included with Omarchy, for monitor glyphs
 - The stock bar sources under `/usr/share/omarchy/shell/plugins/bar`
@@ -27,7 +27,7 @@ The plugin follows the system UI language when the Omarchy shell starts. It supp
 
 The gear and configuration UI otherwise run without Node.js. Node.js is required only for development checks.
 
-The generated `Bar.qml` and `BarModel.js` are pinned to the exact stock files from Omarchy `4.0.1-1`. Other Omarchy versions are unsupported until their stock sources are reviewed and the pinned hashes are updated.
+The generated `Bar.qml` and `BarModel.js` are pinned to the exact stock files from Omarchy `4.0.4-1`. Other Omarchy versions are unsupported until their stock sources are reviewed and the pinned hashes are updated.
 
 ## Install
 
@@ -129,7 +129,7 @@ Run these checks before each release:
 | Primary change | Make another connected monitor primary; confirm it becomes Full and receives the gear button. |
 | Monitor lifecycle | Disconnect and reconnect a configured monitor; confirm its saved mode and workspace list return. |
 | Config conflict | Edit `shell.json` while the panel has an unsaved draft; confirm Reload and Rebase draft block accidental overwrite. |
-| Stock sync | Run Check on `4.0.1-1`; confirm it reports Current. Test a changed stock file and confirm the hash guard rejects Sync. |
+| Stock sync | Run Check on `4.0.4-1`; confirm it reports Current. Test a changed stock file and confirm the hash guard rejects Sync. |
 | Update and remove | Update by plugin ID, then remove with `--yes`; confirm Omarchy reports each operation without manual config patches. |
 
 ## License and attribution
