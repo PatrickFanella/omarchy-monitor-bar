@@ -11,6 +11,15 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- `workspaceWidget` swaps the workspace widget for an installed plugin widget, scoped per monitor like the bundled one.
+- Minimal outputs accept a `label` shown after the glyph and extra `modules` per region.
+
+### Fixed
+
+- The settings gear opens the panel through an injected callback instead of `bar.shell.summon`, which scoped shell APIs don't expose.
+
 ## [1.0.0] - 2026-08-26
 
 ### Added

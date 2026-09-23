@@ -55,6 +55,28 @@ omarchy-shell shell summon patrickfanella.monitor-bar '{}'
 
 Full uses the configured stock bar layout. Minimal shows only the monitor glyph and configured workspaces. Hidden removes the visible bar and its reserved screen space from that monitor.
 
+### Optional settings in `shell.json`
+
+The settings panel doesn't edit these yet; add them by hand to the monitor configuration. Save in the panel keeps them.
+
+| Key | Where | Effect |
+|---|---|---|
+| `workspaceWidget` | top level | Plugin widget ID to use for workspaces instead of the bundled one, for example `"evangelion.workspaces"`. It receives the same `screenName`, `workspaceIds`, and `displayLabels`. Put that ID in `bar.layout` where the workspaces should appear. |
+| `label` | Minimal output | Text shown after the glyph in the theme accent colour, up to 32 characters. |
+| `modules` | Minimal output | Extra widgets per region: `{"left": [...], "center": [...], "right": [...]}`. Entries are widget IDs. Command and QML-source entries are ignored. |
+
+A widget that appears only in `modules` must still be enabled: list it in `bar.layout` or add `{"id": "..."}` to `plugins`. Omarchy's own widgets, such as `omarchy.clock`, are always enabled.
+
+```json
+"DP-3": {
+  "mode": "minimal",
+  "glyph": "☿",
+  "label": "AUX-02",
+  "workspaces": [{ "id": 6, "label": "6" }],
+  "modules": { "right": ["omarchy.clock"] }
+}
+```
+
 ## Keyboard and accessibility
 
 The settings window supports Tab and Shift+Tab across Close, Save, position, transparency, monitor selection, Make primary, mode, glyph and workspace fields, Add and Remove, Check, Sync, Restart shell, Reload, and Rebase draft. Enter or Space activates buttons, toggles, and grouped choices. Dropdowns use Enter or Space to open, arrow keys to move, Enter to select, and Escape to close. Focused fields in the settings scroller are brought into view.

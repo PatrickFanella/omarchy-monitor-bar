@@ -47,11 +47,18 @@ class GeneratedBarTest(unittest.TestCase):
 
     def test_synthetic_workspace_id_is_unique(self) -> None:
         bar = (ROOT / "Bar.qml").read_text(encoding="utf-8")
-        self.assertIn('entry.id = "patrickfanella.monitor-workspaces"', bar)
+        self.assertIn('scopedWorkspaceEntry(entry, "patrickfanella.monitor-workspaces")', bar)
+        self.assertIn('function workspaceWidgetId()', bar)
+        self.assertIn('delete entry.source', bar)
+        self.assertIn('.concat(minimalModules(output, "left"))', bar)
+        self.assertIn('monitorGlyphEntry(output.glyph, screenName + " monitor", output.label)', bar)
+        self.assertIn('center: minimalModules(output, "center")', bar)
+        self.assertIn('if (customModuleType(entry)) entry = { id: ids[i] }', bar)
         self.assertIn('entry.workspaceIds = []', bar)
         self.assertIn('function fullWorkspaceEntry(sourceEntry)', bar)
         self.assertIn('delete entry.workspaceIds', bar)
-        self.assertIn('entryId(entries[i]) === "omarchy.workspaces"', bar)
+        self.assertIn('return id === "omarchy.workspaces" || (workspaceWidgetId() !== "" && id === workspaceWidgetId())', bar)
+        self.assertIn('result[region].push(isWorkspaceEntry(entries[i])', bar)
 
     def test_settings_button_is_runtime_only(self) -> None:
         bar = (ROOT / "Bar.qml").read_text(encoding="utf-8")

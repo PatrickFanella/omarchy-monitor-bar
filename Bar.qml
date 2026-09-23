@@ -884,19 +884,43 @@ Item {
     return { id: id }
   }
 
-  function monitorGlyphEntry(glyph, label) {
+  function monitorGlyphEntry(glyph, label, text) {
     return {
       id: "patrickfanella.monitor-glyph",
       source: monitorGlyphWidgetSource,
       glyph: glyph,
+      label: text || "",
       accessibleLabel: label
     }
   }
 
+  // An installed plugin can replace the bundled workspace widget. It receives
+  // the same screenName, workspaceIds, and displayLabels injections.
+  function workspaceWidgetId() {
+    return monitorConfig && monitorConfig.workspaceWidget ? String(monitorConfig.workspaceWidget) : ""
+  }
+
+  function isWorkspaceEntry(entry) {
+    var id = entryId(entry)
+    return id === "omarchy.workspaces" || (workspaceWidgetId() !== "" && id === workspaceWidgetId())
+  }
+
+  function scopedWorkspaceEntry(entry, fallbackId) {
+    var widget = workspaceWidgetId()
+    if (widget) {
+      entry.id = widget
+      delete entry.source
+    } else {
+      entry.id = fallbackId || entryId(entry)
+      entry.source = monitorWorkspaceWidgetSource
+    }
+    return entry
+  }
+
   function monitorWorkspaceEntry(workspaces) {
-    var entry = configuredEntry("omarchy.workspaces")
-    entry.id = "patrickfanella.monitor-workspaces"
-    entry.source = monitorWorkspaceWidgetSource
+    var widget = workspaceWidgetId()
+    var entry = configuredEntry(widget && layoutHasEntry(widget) ? widget : "omarchy.workspaces")
+    scopedWorkspaceEntry(entry, "patrickfanella.monitor-workspaces")
     entry.workspaceIds = []
     entry.displayLabels = ({})
     for (var i = 0; i < workspaces.length; i++) {
@@ -906,19 +930,42 @@ Item {
     return entry
   }
 
+  function layoutHasEntry(id) {
+    var regions = ["left", "center", "right"]
+    for (var r = 0; r < regions.length; r++) {
+      var entries = layoutConfig && Array.isArray(layoutConfig[regions[r]]) ? layoutConfig[regions[r]] : []
+      for (var i = 0; i < entries.length; i++)
+        if (entryId(entries[i]) === id) return true
+    }
+    return false
+  }
+
   function fullWorkspaceEntry(sourceEntry) {
-    var entry = copyEntry(sourceEntry)
-    entry.source = monitorWorkspaceWidgetSource
+    var entry = scopedWorkspaceEntry(copyEntry(sourceEntry))
     delete entry.workspaceIds
     delete entry.displayLabels
     return entry
   }
 
+  function minimalModules(output, region) {
+    var ids = output.modules && Array.isArray(output.modules[region]) ? output.modules[region] : []
+    var result = []
+    for (var i = 0; i < ids.length; i++) {
+      var entry = configuredEntry(ids[i])
+      // Minimal modules come from installed widgets only; configured command
+      // or QML-source entries stay on the Full bar.
+      if (customModuleType(entry)) entry = { id: ids[i] }
+      result.push(entry)
+    }
+    return result
+  }
+
   function minimalLayout(screenName, output) {
     return {
-      left: [monitorGlyphEntry(output.glyph, screenName + " monitor"), monitorWorkspaceEntry(output.workspaces)],
-      center: [],
-      right: []
+      left: [monitorGlyphEntry(output.glyph, screenName + " monitor", output.label), monitorWorkspaceEntry(output.workspaces)]
+        .concat(minimalModules(output, "left")),
+      center: minimalModules(output, "center"),
+      right: minimalModules(output, "right")
     }
   }
 
@@ -929,7 +976,7 @@ Item {
       var region = regions[r]
       var entries = layoutConfig && Array.isArray(layoutConfig[region]) ? layoutConfig[region] : []
       for (var i = 0; i < entries.length; i++) {
-        result[region].push(entryId(entries[i]) === "omarchy.workspaces"
+        result[region].push(isWorkspaceEntry(entries[i])
           ? fullWorkspaceEntry(entries[i])
           : copyEntry(entries[i]))
       }

@@ -73,6 +73,36 @@ function normalizeWorkspaces(value, fallback, usedIds) {
   return result
 }
 
+var WIDGET_ID = /^[A-Za-z0-9][A-Za-z0-9._-]*$/
+var MODULE_REGIONS = ["left", "center", "right"]
+
+function widgetId(value) {
+  return typeof value === "string" && WIDGET_ID.test(value) ? value : ""
+}
+
+// Extra bar entries for a Minimal output. Each entry is a widget id or an
+// object with an id; anything else is dropped so a bad edit cannot load an
+// arbitrary QML source or command on a secondary monitor.
+function normalizeModules(value) {
+  var source = isObject(value) ? value : {}
+  var result = {}
+  var present = false
+  for (var r = 0; r < MODULE_REGIONS.length; r++) {
+    var region = MODULE_REGIONS[r]
+    var entries = Array.isArray(source[region]) ? source[region] : []
+    var kept = []
+    for (var i = 0; i < entries.length; i++) {
+      var id = widgetId(isObject(entries[i]) ? entries[i].id : entries[i])
+      if (id) kept.push(id)
+    }
+    if (kept.length > 0) {
+      result[region] = kept
+      present = true
+    }
+  }
+  return present ? result : null
+}
+
 function normalizeConfig(value) {
   var configPresent = isObject(value)
   var source = configPresent ? value : DEFAULT_CONFIG
@@ -101,10 +131,17 @@ function normalizeConfig(value) {
         mode === "minimal" ? usedIds : {}
       )
     }
+    if (typeof raw.label === "string" && raw.label.trim() !== "")
+      normalized.label = raw.label.trim().slice(0, 32)
+    var modules = normalizeModules(raw.modules)
+    if (modules) normalized.modules = modules
     outputs[name] = normalized
   }
 
-  return { version: 1, primary: requestedPrimary, outputs: outputs }
+  var result = { version: 1, primary: requestedPrimary, outputs: outputs }
+  var workspaceWidget = widgetId(source.workspaceWidget)
+  if (workspaceWidget) result.workspaceWidget = workspaceWidget
+  return result
 }
 
 function hasCanonicalConfig(shellConfig) {

@@ -101,3 +101,38 @@ context.shell.mutateShellConfig = () => false
 vm.runInNewContext(saveSource + ";save()", context)
 assert.equal(context.baselineSnapshot, "dirty")
 assert.equal(context.writingConfig, false)
+
+const extended = model.normalizeConfig({
+  primary: "DP-1",
+  workspaceWidget: "evangelion.workspaces",
+  outputs: {
+    "DP-1": { mode: "full", modules: { right: ["ignored.on.full"] } },
+    "DP-3": { mode: "minimal", modules: {
+      left: ["magi.clock", { id: "magi.mission", source: "/tmp/evil.qml" }],
+      center: ["../escape", "", 7, null, { exec: "rm -rf ~" }],
+      right: "not-an-array",
+      bogus: ["x.y"]
+    } },
+    "HDMI-A-1": { mode: "minimal", modules: { center: [] } }
+  }
+})
+assert.equal(extended.workspaceWidget, "evangelion.workspaces")
+assert.deepEqual(plain(extended.outputs["DP-3"].modules), { left: ["magi.clock", "magi.mission"] })
+assert.deepEqual(plain(extended.outputs["DP-1"].modules), { right: ["ignored.on.full"] }, "modules survive a mode change")
+assert.equal(extended.outputs["HDMI-A-1"].modules, undefined)
+assert.equal(model.normalizeConfig({ workspaceWidget: "../x" }).workspaceWidget, undefined)
+assert.equal(model.normalizeConfig({ workspaceWidget: 5 }).workspaceWidget, undefined)
+assert.deepEqual(plain(model.normalizeConfig(JSON.parse(model.serializeConfig(extended)))), plain(extended), "round trip is stable")
+console.log("MonitorBarModel minimal modules and workspace widget tests passed")
+
+const labelled = model.normalizeConfig({ primary: "A", outputs: {
+  "B": { mode: "minimal", label: "  MAGI-02 // AUX  " },
+  "C": { mode: "minimal", label: "   " },
+  "D": { mode: "minimal", label: 42 },
+  "E": { mode: "minimal", label: "x".repeat(40) }
+} })
+assert.equal(labelled.outputs.B.label, "MAGI-02 // AUX")
+assert.equal(labelled.outputs.C.label, undefined)
+assert.equal(labelled.outputs.D.label, undefined)
+assert.equal(labelled.outputs.E.label.length, 32)
+console.log("MonitorBarModel output label tests passed")
