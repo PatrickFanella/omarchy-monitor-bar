@@ -1,5 +1,7 @@
 # Omarchy Multi-Monitor Bar
 
+![Omarchy Multi-Monitor Bar settings with a Full primary display and two Minimal secondary displays](preview.png)
+
 Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monitor. It keeps the stock Omarchy bar on the primary monitor and supports smaller or hidden bars on other outputs.
 
 ## Features
@@ -11,6 +13,30 @@ Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monito
 - Stock bar position, transparency, widgets, panels, and trusted local commands on Full bars
 - A settings panel with validation, conflict handling, and stock-source checks
 - Localized settings and accessibility text in 10 languages
+
+## Screenshots and media
+
+The preview above is an edited desktop capture of the settings panel: DP-1
+is the Full primary display, while DP-3 and HDMI-A-1 use Minimal bars. The
+large empty area was shortened and the title and background were added for
+presentation.
+
+The following captures show the installed Minimal bars on the two secondary
+outputs. Each has its own glyph and workspace labels.
+
+**DP-3, portrait output**
+
+![Minimal bar on DP-3 with its monitor glyph and workspace labels](docs/media/minimal-bar.png)
+
+**HDMI-A-1, landscape output**
+
+![Minimal bar on HDMI-A-1 with a different glyph and workspace labels](docs/media/secondary-bar.png)
+
+These are unretouched captures of the 30-pixel bars. The active Omarchy theme
+supplies their colours and transparent background. Glyphs, labels and monitor
+names reflect this setup; configure your own in settings.
+
+See [media notes](docs/media/README.md) for capture provenance and reuse.
 
 ## Languages
 
