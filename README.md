@@ -1,5 +1,14 @@
 # Omarchy Multi-Monitor Bar
 
+<a href="https://subcult.tv">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/subcult-dark.svg">
+    <img src="docs/brand/subcult-light.svg" alt="SUBCULT" width="400">
+  </picture>
+</a>
+
+[SUBCULT](https://subcult.tv) · [Support on Patreon](https://patreon.com/subcult)
+
 ![Omarchy Multi-Monitor Bar settings with a Full primary display and two Minimal secondary displays](preview.png)
 
 Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monitor. It keeps the stock Omarchy bar on the primary monitor and supports smaller or hidden bars on other outputs.
@@ -163,3 +172,12 @@ Run these checks before each release:
 Omarchy Multi-Monitor Bar is licensed under the MIT License. See [LICENSE](LICENSE).
 
 Generated `Bar.qml` and `BarModel.js`, `Workspaces.qml`, and the pinned source snapshots derive from [Omarchy](https://github.com/basecamp/omarchy), Copyright David Heinemeier Hansson, under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## About SUBCULT and support
+
+Made by [Patrick Fanella](https://patrickfanella.co) as part of
+[SUBCULT](https://subcult.tv). Explore the tools and projects at
+**[subcult.tv](https://subcult.tv)**.
+
+If this plugin is useful to you, **[support SUBCULT on Patreon](https://patreon.com/subcult)**
+to help fund its development and the wider project.
