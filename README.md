@@ -1,5 +1,16 @@
 # Omarchy Multi-Monitor Bar
 
+<a href="https://subcult.tv">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/subcult-dark.svg">
+    <img src="docs/brand/subcult-light.svg" alt="SUBCULT" width="400">
+  </picture>
+</a>
+
+[SUBCULT](https://subcult.tv) · [Support on Patreon](https://patreon.com/subcult)
+
+![Omarchy Multi-Monitor Bar settings with a Full primary display and two Minimal secondary displays](preview.png)
+
 Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monitor. It keeps the stock Omarchy bar on the primary monitor and supports smaller or hidden bars on other outputs.
 
 ## Features
@@ -11,6 +22,30 @@ Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monito
 - Stock bar position, transparency, widgets, panels, and trusted local commands on Full bars
 - A settings panel with validation, conflict handling, and stock-source checks
 - Localized settings and accessibility text in 10 languages
+
+## Screenshots and media
+
+The preview above is an edited desktop capture of the settings panel: DP-1
+is the Full primary display, while DP-3 and HDMI-A-1 use Minimal bars. The
+large empty area was shortened and the title and background were added for
+presentation.
+
+The following captures show the installed Minimal bars on the two secondary
+outputs. Each has its own glyph and workspace labels.
+
+**DP-3, portrait output**
+
+![Minimal bar on DP-3 with its monitor glyph and workspace labels](docs/media/minimal-bar.png)
+
+**HDMI-A-1, landscape output**
+
+![Minimal bar on HDMI-A-1 with a different glyph and workspace labels](docs/media/secondary-bar.png)
+
+These are unretouched captures of the 30-pixel bars. The active Omarchy theme
+supplies their colours and transparent background. Glyphs, labels and monitor
+names reflect this setup; configure your own in settings.
+
+See [media notes](docs/media/README.md) for capture provenance and reuse.
 
 ## Languages
 
@@ -137,3 +172,12 @@ Run these checks before each release:
 Omarchy Multi-Monitor Bar is licensed under the MIT License. See [LICENSE](LICENSE).
 
 Generated `Bar.qml` and `BarModel.js`, `Workspaces.qml`, and the pinned source snapshots derive from [Omarchy](https://github.com/basecamp/omarchy), Copyright David Heinemeier Hansson, under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## About SUBCULT and support
+
+Made by [Patrick Fanella](https://patrickfanella.co) as part of
+[SUBCULT](https://subcult.tv). Explore the tools and projects at
+**[subcult.tv](https://subcult.tv)**.
+
+If this plugin is useful to you, **[support SUBCULT on Patreon](https://patreon.com/subcult)**
+to help fund its development and the wider project.
