@@ -580,6 +580,10 @@ def transform_bar(source: str) -> str:
 """,
         """      if ("settings" in target) target.settings = moduleSettings
       if ("screenName" in target) target.screenName = slot.screenName
+      if (entry && entry.syntheticSettings && "openSettings" in target)
+        target.openSettings = function() {
+          return host.shell && host.shell.summon("patrickfanella.monitor-bar", "{}")
+        }
     }
 """,
     )

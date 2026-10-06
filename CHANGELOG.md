@@ -2,6 +2,8 @@
 
 ## Unreleased compatibility fixes
 
+- Open the primary bar settings gear through the owning bar callback, preserving the callback when stock bar sources are regenerated.
+
 - Keep legacy popup dismissal working by forwarding direct hover-suppression writes through the scoped bar setter.
 
 - Fix custom bar asset resolution and bar-scoped monitor settings, retaining read compatibility with existing monitor layouts. Clarify that processes run without elevated privileges.

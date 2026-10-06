@@ -8,6 +8,7 @@ import "I18n.js" as I18n
 WidgetButton {
   id: root
 
+  property var openSettings: null
   property string moduleName: ""
   property var settings: ({})
   property string screenName: ""
@@ -24,6 +25,8 @@ WidgetButton {
   activeFocusOnTab: true
 
   function activate() {
+    if (typeof root.openSettings === "function")
+      return root.openSettings()
     if (bar && bar.shell && typeof bar.shell.summon === "function")
       bar.shell.summon("patrickfanella.monitor-bar", "{}")
   }
