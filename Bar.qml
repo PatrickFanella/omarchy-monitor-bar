@@ -121,7 +121,7 @@ Item {
 
   Component {
     id: pluginBarApiComponent
-    PluginBarApi { }
+    MonitorPluginBarApi { }
   }
 
   function publicLayoutConfig() {

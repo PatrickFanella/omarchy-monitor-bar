@@ -36,6 +36,7 @@ def replace_exact(text: str, old: str, new: str, *, count: int = 1) -> str:
 
 def transform_bar(source: str) -> str:
     text = source
+    text = replace_exact(text, "    PluginBarApi { }", "    MonitorPluginBarApi { }")
     text = replace_exact(
         text,
         'import "BarModel.js" as BarModel\n',
