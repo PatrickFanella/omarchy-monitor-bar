@@ -14,7 +14,10 @@ require_command() {
   fi
 }
 
-for command_name in git node python3 qmllint omarchy; do
+# Omarchy uses Qt 6; unqualified Arch Qt tools may select Qt 5.
+export PATH="/usr/lib/qt6/bin:$PATH"
+
+for command_name in git node python3 qmllint qmltestrunner omarchy; do
   require_command "$command_name"
 done
 
@@ -30,6 +33,7 @@ export PYTHONPYCACHEPREFIX="$PYCACHE_DIR"
 
 cd -- "$REPO_ROOT"
 
+QT_QPA_PLATFORM=offscreen qmltestrunner -input tests/tst_popup_compatibility.qml
 node tests/test_model.mjs
 node tests/test_bar_model.mjs
 python3 -m unittest discover -s tests -p 'test_*.py'

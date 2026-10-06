@@ -36,6 +36,7 @@ def replace_exact(text: str, old: str, new: str, *, count: int = 1) -> str:
 
 def transform_bar(source: str) -> str:
     text = source
+    text = replace_exact(text, "    PluginBarApi { }", "    MonitorPluginBarApi { }")
     text = replace_exact(
         text,
         'import "BarModel.js" as BarModel\n',
@@ -579,6 +580,10 @@ def transform_bar(source: str) -> str:
 """,
         """      if ("settings" in target) target.settings = moduleSettings
       if ("screenName" in target) target.screenName = slot.screenName
+      if (entry && entry.syntheticSettings && "openSettings" in target)
+        target.openSettings = function() {
+          return host.shell && host.shell.summon("patrickfanella.monitor-bar", "{}")
+        }
     }
 """,
     )
