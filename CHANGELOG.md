@@ -2,6 +2,8 @@
 
 ## Unreleased compatibility fixes
 
+- Keep legacy popup dismissal working by forwarding direct hover-suppression writes through the scoped bar setter.
+
 - Fix custom bar asset resolution and bar-scoped monitor settings, retaining read compatibility with existing monitor layouts. Clarify that processes run without elevated privileges.
 - Regenerate from Omarchy 4.0.4-1 so replacement-bar widgets receive the current scoped bar, panel, registry, and own-service APIs.
 
