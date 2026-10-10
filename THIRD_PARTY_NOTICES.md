@@ -24,3 +24,10 @@
 > WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Source: [basecamp/omarchy](https://github.com/basecamp/omarchy)
+
+The components under `groups/` adapt Shelfish 1.1.1 from
+[PatrickFanella/omarchy-plugin-shelfish](https://github.com/PatrickFanella/omarchy-plugin-shelfish),
+source revision `cf2c3c3f21707087dc8898ea72e92253d406f87f`.
+Its MIT license is preserved in [groups/LICENSE](groups/LICENSE).
+The integrated version uses the monitor bar's native configuration API and
+renders group layouts without rewriting the saved widget layout.

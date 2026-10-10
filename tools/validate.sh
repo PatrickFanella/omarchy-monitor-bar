@@ -36,11 +36,14 @@ cd -- "$REPO_ROOT"
 QT_QPA_PLATFORM=offscreen qmltestrunner -input tests/tst_popup_compatibility.qml
 node tests/test_model.mjs
 node tests/test_bar_model.mjs
+node tests/test_groups.cjs
+node tests/test_groups_i18n.cjs
+node tests/test_group_layout.cjs
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 -m py_compile tools/*.py tests/*.py
 python3 tools/sync_stock_bar.py --check
 python3 tools/sync_stock_bar.py --upstream-dir vendor/omarchy-4.0.4-1/bar --check
-qmllint -I "$OMARCHY_SHELL_DIR" ./*.qml
+qmllint -I "$OMARCHY_SHELL_DIR" ./*.qml groups/*.qml
 omarchy plugin validate .
 python3 -c 'import json, pathlib; json.loads(pathlib.Path("manifest.json").read_text(encoding="utf-8"))'
 git diff --check

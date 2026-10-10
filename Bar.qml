@@ -11,6 +11,8 @@ import qs.Commons
 import qs.Ui
 import "BarModel.js" as BarModel
 import "MonitorBarModel.js" as MonitorBarModel
+import "groups" as Groups
+import "groups/Model.js" as GroupModel
 
 Item {
   id: root
@@ -25,6 +27,12 @@ Item {
   property var monitorConfig: MonitorBarModel.defaultConfig([])
   property string monitorConfigText: ""
   property var monitorShellConfig: ({})
+  Groups.Service {
+    id: groupService
+    shell: root.shell
+    hostBar: root
+    barWidgetRegistry: root.barWidgetRegistry
+  }
   FileView {
     path: root.omarchyConfigDir + "/shell.json"
     watchChanges: true
@@ -941,7 +949,8 @@ Item {
         syntheticSettings: true
       })
     }
-    return result
+    return GroupModel.groupedLayout(result, Object.assign({}, groupService.config, { activeGroupId: groupService.revealedGroupId || groupService.activeGroupId }),
+      "patrickfanella.monitor-bar.groups", decodeURIComponent(monitorAssetSource("groups").replace(/^file:\/\//, "")).replace(/\/$/, ""), root.barWidgetRegistry ? root.barWidgetRegistry.widgets : null)
   }
 
   function isPrimaryScreen(screenName) {
