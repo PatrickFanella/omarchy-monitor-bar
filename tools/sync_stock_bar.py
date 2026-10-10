@@ -40,7 +40,7 @@ def transform_bar(source: str) -> str:
     text = replace_exact(
         text,
         'import "BarModel.js" as BarModel\n',
-        'import "BarModel.js" as BarModel\nimport "MonitorBarModel.js" as MonitorBarModel\n',
+        'import "BarModel.js" as BarModel\nimport "MonitorBarModel.js" as MonitorBarModel\nimport "groups" as Groups\nimport "groups/Model.js" as GroupModel\n',
     )
     text = replace_exact(
         text,
@@ -73,6 +73,12 @@ def transform_bar(source: str) -> str:
   property var monitorConfig: MonitorBarModel.defaultConfig([])
   property string monitorConfigText: ""
   property var monitorShellConfig: ({})
+  Groups.Service {
+    id: groupService
+    shell: root.shell
+    hostBar: root
+    barWidgetRegistry: root.barWidgetRegistry
+  }
   FileView {
     path: root.omarchyConfigDir + "/shell.json"
     watchChanges: true
@@ -223,7 +229,8 @@ def transform_bar(source: str) -> str:
         syntheticSettings: true
       })
     }
-    return result
+    return GroupModel.groupedLayout(result, Object.assign({}, groupService.config, { activeGroupId: groupService.revealedGroupId || groupService.activeGroupId }),
+      "patrickfanella.monitor-bar.groups", decodeURIComponent(monitorAssetSource("groups").replace(/^file:\\/\\//, "")).replace(/\\/$/, ""), root.barWidgetRegistry ? root.barWidgetRegistry.widgets : null)
   }
 
   function isPrimaryScreen(screenName) {

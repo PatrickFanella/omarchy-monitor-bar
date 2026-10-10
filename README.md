@@ -20,6 +20,7 @@ Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monito
 - A configurable glyph and workspace list for each Minimal bar
 - Monitor-scoped workspace buttons and labels
 - Stock bar position, transparency, widgets, panels, and trusted local commands on Full bars
+- Built-in Shelfish groups with a localized editor, ordered members, and status reveal
 - A settings panel with validation, conflict handling, and stock-source checks
 - Localized settings and accessibility text in 10 languages
 
@@ -89,6 +90,47 @@ omarchy-shell shell summon patrickfanella.monitor-bar '{}'
 5. Select **Save**.
 
 Full uses the configured stock bar layout. Minimal shows only the monitor glyph and configured workspaces. Hidden removes the visible bar and its reserved screen space from that monitor.
+
+## Widget groups
+
+Shelfish is built into Full bars. Select the sliders button beside the monitor
+settings gear to create groups, set their names, icons and expansion direction,
+and order their members. Select a group icon to open or close it. Right-click
+opens the group editor; middle-click closes all groups. Minimal bars retain their
+glyph and workspace layout.
+
+No separate Shelfish installation is required. Existing standalone Shelfish
+settings are not imported. Restore its managed widgets and remove the standalone
+plugin before assigning those widgets to the built-in groups.
+
+Group settings live under `bar["patrickfanella.monitor-bar.groups"]` in
+`shell.json`. The monitor bar saves them through Omarchy's native configuration
+API. It builds the expanded layout in memory and leaves the original `bar.layout`
+entries intact, including duplicate widget instances and their options. Only the
+open group's members are mounted. Switching back to the stock bar therefore
+shows the original widgets again. Groups are shared by all Full monitors.
+
+The group editor supports a settings shortcut inside a group. The native tray
+stays outside groups. Group buttons and the settings anchor cannot be dragged.
+
+Advanced configuration accepts `watchedPaths` rules such as
+`plugin.id=state|nested.value;other.id=count`, JSON `policies` keyed by widget ID
+with `autoReveal` and `revealSeconds`, and a default `revealSeconds` from 1 to 300.
+It also reads explicit `shelfishStatus` and legacy `omatenderStatus` properties.
+Status watching applies to mounted widgets; closed-group widgets do not run and
+cannot emit status changes. A revealed member's open popup delays automatic
+closure. Status values and paths retain Shelfish's size and depth limits.
+
+The built-in IPC target supports `manage`, `show`, `hide`, `toggle`, `showGroup`,
+`toggleGroup`, `status`, and `restoreAll`. For example:
+
+```sh
+omarchy-shell patrickfanella.monitor-bar.groups manage
+omarchy-shell patrickfanella.monitor-bar.groups restoreAll
+```
+
+Restore clears group membership while retaining the group definitions. Member
+widgets reappear at their original layout positions.
 
 ## Keyboard and accessibility
 

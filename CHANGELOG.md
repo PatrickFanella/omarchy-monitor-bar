@@ -15,6 +15,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 
 ## [Unreleased]
 
+### Added
+
+- Built-in Shelfish group editor, collapsible groups, ordering, status policies, and IPC controls on Full bars.
+- Runtime group layouts that preserve original widget positions, duplicate instances, and configuration through group switches and restoration.
+
 ## [1.0.0] - 2026-08-26
 
 ### Added
