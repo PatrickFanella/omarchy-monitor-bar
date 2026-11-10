@@ -7,22 +7,11 @@
 
 [SUBCULT](https://subcult.tv) · [Support on Patreon](https://patreon.com/subcult)
 
+A replacement top bar for [Omarchy](https://github.com/basecamp/omarchy) that gives each connected monitor its own layout. The primary monitor keeps the stock Omarchy bar; the others can show a small bar with a glyph and their own workspaces, or no bar at all. It is for Omarchy users with more than one screen.
+
+The bar is generated from the stock bar files of one exact Omarchy package. Release 1.0.0 supported Omarchy `4.0.1-1`. The current `main` branch is pinned to `4.0.4-1` and adds built-in widget groups; those changes are not in a tagged release yet. Other Omarchy versions are unsupported.
+
 ![Omarchy Multi-Monitor Bar settings with a Full primary display and two Minimal secondary displays](preview.png)
-
-Omarchy Multi-Monitor Bar assigns a separate bar layout to each connected monitor. It keeps the stock Omarchy bar on the primary monitor and supports smaller or hidden bars on other outputs.
-
-## Features
-
-- Full, Minimal, or Hidden mode per monitor
-- One primary monitor locked to Full mode
-- A configurable glyph and workspace list for each Minimal bar
-- Monitor-scoped workspace buttons and labels
-- Stock bar position, transparency, widgets, panels, and trusted local commands on Full bars
-- Built-in Shelfish groups with a localized editor, ordered members, and status reveal
-- A settings panel with validation, conflict handling, and stock-source checks
-- Localized settings and accessibility text in 10 languages
-
-## Screenshots and media
 
 The preview above is an edited desktop capture of the settings panel: DP-1
 is the Full primary display, while DP-3 and HDMI-A-1 use Minimal bars. The
@@ -44,13 +33,22 @@ These are unretouched captures of the 30-pixel bars. The active Omarchy theme
 supplies their colours and transparent background. Glyphs, labels and monitor
 names reflect this setup; configure your own in settings.
 
-See [media notes](docs/media/README.md) for capture provenance and reuse.
+## Features
 
-## Languages
+- Full, Minimal, or Hidden mode per monitor.
+- One primary monitor locked to Full mode.
+- A configurable glyph and workspace list for each Minimal bar.
+- Monitor-scoped workspace buttons and labels.
+- Stock bar position, transparency, widgets, panels, and trusted local commands on Full bars.
+- Built-in Shelfish groups with a localized editor, ordered members, and status reveal.
+- A settings panel with validation, conflict handling, and stock-source checks.
+- Localized settings and accessibility text in 10 languages.
 
-The plugin follows the system UI language when the Omarchy shell starts. It supports English, German, Spanish, French, Italian, Brazilian Portuguese, Dutch, Polish, Croatian, and Simplified Chinese. Unsupported locales use English. Restart the shell after changing the system language.
+The plugin follows the system UI language when the Omarchy shell starts. It supports English, German, Spanish, French, Italian, Brazilian Portuguese, Dutch, Polish, Croatian and Simplified Chinese; other locales use English. Restart the shell after changing the system language.
 
-## Runtime dependencies
+## Quick start
+
+### Requirements
 
 - Omarchy package `4.0.4-1`
 - Quickshell, Hyprland, `hyprctl`, and the Omarchy shell commands included with that package
@@ -63,15 +61,15 @@ The gear and configuration UI otherwise run without Node.js. Node.js is required
 
 The generated `Bar.qml` and `BarModel.js` are pinned to the exact stock files from Omarchy `4.0.4-1`. Other Omarchy versions are unsupported until their stock sources are reviewed and the pinned hashes are updated.
 
-## Install
+### Install
 
 ```sh
-omarchy plugin add https://github.com/PatrickFanella/omarchy-monitor-bar.git --enable --yes
+omarchy plugin add https://github.com/subculture-collective/omarchy-monitor-bar.git --enable --yes
 ```
 
 No `shell.settings` patch is required.
 
-## Open settings
+### Open settings
 
 Select the gear button on the primary bar, or run:
 
@@ -79,7 +77,7 @@ Select the gear button on the primary bar, or run:
 omarchy-shell shell summon patrickfanella.monitor-bar '{}'
 ```
 
-## Configure monitor bars
+### Configure monitor bars
 
 1. Select a monitor.
 2. Choose **Full**, **Minimal**, or **Hidden**.
@@ -88,6 +86,20 @@ omarchy-shell shell summon patrickfanella.monitor-bar '{}'
 5. Select **Save**.
 
 Full uses the configured stock bar layout. Minimal shows only the monitor glyph and configured workspaces. Hidden removes the visible bar and its reserved screen space from that monitor.
+
+### Update or remove
+
+Update the installed Git checkout:
+
+```sh
+omarchy plugin update patrickfanella.monitor-bar --yes
+```
+
+Remove the plugin:
+
+```sh
+omarchy plugin remove patrickfanella.monitor-bar --yes
+```
 
 ## Widget groups
 
@@ -138,20 +150,6 @@ The unsaved-changes dialog traps focus across Cancel, Discard, and Save. The res
 
 The bar's layer-shell windows explicitly use `WlrKeyboardFocus.None`. Giving a persistent bar keyboard focus would steal keys from the active application, so the gear and workspace buttons cannot be reached by Tab while they remain in the bar. Their roles, names, descriptions, and selected state are exposed for accessibility APIs, and the controls retain pointer operation. Open settings with the summon command above. Use the configured Hyprland workspace shortcuts as the keyboard path for switching workspaces.
 
-## Update or remove
-
-Update the installed Git checkout:
-
-```sh
-omarchy plugin update patrickfanella.monitor-bar --yes
-```
-
-Remove the plugin:
-
-```sh
-omarchy plugin remove patrickfanella.monitor-bar --yes
-```
-
 ## Configuration and recovery
 
 The plugin stores its monitor configuration under the `bar["patrickfanella.monitor-bar"]` key in `~/.config/omarchy/shell.json`. Legacy top-level monitor settings remain readable; selecting Save writes the bar-scoped configuration. It also sets `bar.id`, `bar.position`, and `bar.transparent` through the Omarchy shell API. It does not edit `shell.settings`.
@@ -180,6 +178,20 @@ To check generated files against the pinned snapshot instead of installed source
 python3 tools/sync_stock_bar.py --upstream-dir vendor/omarchy-4.0.4-1/bar --check
 ```
 
+## Project layout
+
+| Path | Contents |
+| --- | --- |
+| `manifest.json` | Plugin ID and the `bar` and `panel` entry points. |
+| `Bar.qml`, `BarModel.js` | Generated from the pinned stock Omarchy bar. Do not edit by hand. |
+| `MonitorBarModel.js`, `MonitorGlyph.qml`, `Workspaces.qml`, `MonitorPluginBarApi.qml` | Per-monitor modes, glyphs and workspace buttons. |
+| `SettingsPanel.qml`, `SettingsButton.qml`, `I18n.js` | Settings panel, gear button and translations. |
+| `groups/` | Built-in Shelfish widget groups. |
+| `tools/sync_stock_bar.py` | Generates `Bar.qml` and `BarModel.js` and checks the pinned hashes. |
+| `tools/validate.sh` | Full release check. |
+| `vendor/` | Pinned stock bar snapshots from Omarchy packages. |
+| `tests/` | Node, Python and QML tests. |
+
 ## Develop and validate
 
 Run the complete release check on an Omarchy system:
@@ -207,24 +219,14 @@ Run these checks before each release:
 | Stock sync | Run Check on `4.0.4-1`; confirm it reports Current. Test a changed stock file and confirm the hash guard rejects Sync. |
 | Update and remove | Update by plugin ID, then remove with `--yes`; confirm Omarchy reports each operation without manual config patches. |
 
+## Contributing
+
+Report bugs and request features in [GitHub issues](https://github.com/subculture-collective/omarchy-monitor-bar/issues). Send code as pull requests on GitHub against `main`. CI runs the Python and Node model tests, compile and manifest checks, the generated-file check against the pinned snapshot and `git diff --check` on every pull request. The QML tests, `qmllint` and plugin validation need an Omarchy system, so run `tools/validate.sh` locally before you open a pull request.
+
 ## License and attribution
 
 Omarchy Multi-Monitor Bar is licensed under the MIT License. See [LICENSE](LICENSE).
 
 Generated `Bar.qml` and `BarModel.js`, `Workspaces.qml`, and the pinned source snapshots derive from [Omarchy](https://github.com/basecamp/omarchy), Copyright David Heinemeier Hansson, under the MIT License. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-## About SUBCULT and support
-
-<a href="https://subcult.tv">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/subcult-dark.svg">
-    <img src="docs/brand/subcult-light.svg" alt="SUBCULT" width="240">
-  </picture>
-</a>
-
-Made by [Patrick Fanella](https://patrickfanella.co) as part of
-[SUBCULT](https://subcult.tv). Explore the tools and projects at
-**[subcult.tv](https://subcult.tv)**.
-
-If this plugin is useful to you, **[support SUBCULT on Patreon](https://patreon.com/subcult)**
-to help fund its development and the wider project.
+Made by Patrick Fanella as part of [SUBCULT](https://subcult.tv).
